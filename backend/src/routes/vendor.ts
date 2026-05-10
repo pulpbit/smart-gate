@@ -11,32 +11,34 @@ const vendorRouter = new Hono<Env>()
 
 vendorRouter.use('*', authMiddleware())
 
-vendorRouter.post('/entry', async (c) => {
-  const payload = c.get('jwtPayload')
-  const body = await c.req.json()
-  
-  const {
-    name, mobile, purpose, companyName,
-    aadhaarNumber, aadhaarFront, aadhaarBack
-  } = body
+ vendorRouter.post('/entry', async (c) => {
+   const payload = c.get('jwtPayload')
+   const body = await c.req.json()
+   
+   const {
+     name, mobile, companyName,
+     aadhaarNumber, aadhaarFront, aadhaarBack
+   } = body
 
-  const result = await c.env.DB.prepare(`
-    INSERT INTO vendor_entry (
-      name, mobile, purpose, company_name,
-      aadhaar_number, aadhaar_front, aadhaar_back,
-      gate_number, created_by
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).bind(
-    name, mobile, purpose, companyName,
-    aadhaarNumber, aadhaarFront, aadhaarBack,
-    payload.gateNumber, payload.userId
-  ).run()
+   const gateNumber = payload.gateNumber || payload.gate_name || null
 
-  return c.json({ 
-    id: result.meta.last_row_id,
-    success: true 
-  })
-})
+   const result = await c.env.DB.prepare(`
+     INSERT INTO vendor_entry (
+       name, mobile, company_name,
+       aadhaar_number, aadhaar_front, aadhaar_back,
+       gate_number, created_by
+     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+   `).bind(
+     name, mobile, companyName,
+     aadhaarNumber, aadhaarFront, aadhaarBack,
+     gateNumber, payload.userId
+   ).run()
+
+   return c.json({ 
+     id: result.meta.last_row_id,
+     success: true 
+   })
+ })
 
 vendorRouter.get('/', async (c) => {
   const results = await c.env.DB.prepare(`

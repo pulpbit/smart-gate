@@ -62,7 +62,7 @@
       color: #4a5568;
       font-weight: 500;
     }
-    input, select {
+    input {
       width: 100%;
       padding: 12px 16px;
       border: 2px solid #e2e8f0;
@@ -70,7 +70,7 @@
       font-size: 16px;
       transition: border-color 0.2s;
     }
-    input:focus, select:focus {
+    input:focus {
       outline: none;
       border-color: #667eea;
     }
@@ -247,18 +247,6 @@
         </div>
 
         <div class="form-group">
-          <label for="purpose">Purpose *</label>
-          <select id="purpose" required>
-            <option value="">Select purpose</option>
-            <option value="Delivery">Delivery</option>
-            <option value="Meeting">Meeting</option>
-            <option value="Maintenance">Maintenance</option>
-            <option value="Interview">Interview</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-
-        <div class="form-group">
           <label for="companyName">Company Name</label>
           <input type="text" id="companyName" placeholder="Enter company name">
         </div>
@@ -358,6 +346,87 @@
       vendorForm.style.display = 'block';
     }
 
+    function extractNameFromText(text) {
+      const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 2);
+      
+      const nameKeywords = ['name', 'नाम', 'nama', 'nane', 'nam'];
+      const excludedWords = ['government', 'india', 'aadhaar', 'unique', 'identification', 'authority', 
+                             'महानिदेशालय', 'आधार', 'भारत', 'सरकार', 'govt', 'of', 'the', 'to',
+                             'address', 'पता', 'dob', 'date', 'birth', 'जन्म', 'male', 'female',
+                             'पुरुष', 'महिला', 'm', 'f', 'enrolment', 'enroll', 'vid', 'help',
+                             'uidai', 'www', 'gov', 'in', '1947', 'care', 'contact', 'toll', 'free'];
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].toLowerCase();
+        
+        for (const keyword of nameKeywords) {
+          if (line.includes(keyword)) {
+            const match = lines[i].match(/[:\s]([A-Z][a-zA-Z\s]{3,})/);
+            if (match) {
+              const candidate = match[1].trim();
+              const words = candidate.toLowerCase().split(/\s+/);
+              const isExcluded = words.some(w => excludedWords.includes(w));
+              if (!isExcluded && candidate.length > 3) {
+                return candidate;
+              }
+            }
+            
+            if (i + 1 < lines.length) {
+              const nextLine = lines[i + 1];
+              const nextLineLower = nextLine.toLowerCase();
+              const isExcluded = excludedWords.some(w => nextLineLower.includes(w));
+              
+              if (!isExcluded && /^[A-Z][a-zA-Z\s]{3,}$/.test(nextLine.trim())) {
+                return nextLine.trim();
+              }
+              
+              if (!isExcluded && nextLine.trim().length > 3) {
+                const hasExcluded = excludedWords.some(w => nextLineLower.includes(w));
+                if (!hasExcluded) {
+                  const justName = nextLine.replace(/[^a-zA-Z\s]/g, '').trim();
+                  if (justName.length > 3) {
+                    return justName;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      const namePatterns = [
+        /([A-Z][a-z]{2,}\s+[A-Z][a-z]{2,}(?:\s+[A-Z][a-z]{0,})?)/,
+        /([A-Z]{3,}\s+[A-Z]{3,}(?:\s+[A-Z]{2,})?)/,
+      ];
+      
+      for (const line of lines) {
+        for (const pattern of namePatterns) {
+          const match = line.match(pattern);
+          if (match) {
+            const candidate = match[1].trim();
+            const lower = candidate.toLowerCase();
+            const isExcluded = excludedWords.some(w => lower.includes(w));
+            if (!isExcluded && candidate.length > 5) {
+              return candidate;
+            }
+          }
+        }
+      }
+      
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (/^[A-Za-z\s]{4,}$/.test(trimmed)) {
+          const lower = trimmed.toLowerCase();
+          const isExcluded = excludedWords.some(w => lower.includes(w));
+          if (!isExcluded && trimmed.split(/\s+/).length >= 2) {
+            return trimmed;
+          }
+        }
+      }
+      
+      return null;
+    }
+
     async function performOCR(imageData) {
       ocrStatus.style.display = 'block';
       ocrStatus.textContent = 'Processing OCR...';
@@ -378,66 +447,16 @@
           document.getElementById('aadhaarNumber').value = lastFour;
         }
         
-        const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+        const extractedName = extractNameFromText(text);
+        console.log('Extracted Name:', extractedName);
         
-        let foundName = '';
-        
-        const namePatterns = [
-          /(?:Name|नाम)\s*[:\s]\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,3})/i,
-          /(?:Name|नाम)\s*[:\s]\s*([A-Z\s]{3,})/
-        ];
-        
-        for (const pattern of namePatterns) {
-          const match = text.match(pattern);
-          if (match && match[1].trim().length > 2) {
-            foundName = match[1].trim();
-            break;
-          }
-        }
-        
-        if (!foundName) {
-          const nameKeywords = ['name', 'नाम'];
-          for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].toLowerCase();
-            if (nameKeywords.some(keyword => line.includes(keyword))) {
-              const match = lines[i].match(/[:\s]([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,3})/);
-              if (match) {
-                foundName = match[1].trim();
-                break;
-              }
-              if (i + 1 < lines.length) {
-                const nextLine = lines[i + 1].trim();
-                if (/^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*$/.test(nextLine)) {
-                  foundName = nextLine;
-                  break;
-                }
-              }
-            }
-          }
-        }
-        
-        if (!foundName) {
-          for (const line of lines) {
-            if (/^[A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3}$/.test(line)) {
-              if (!line.includes('Government') && 
-                  !line.includes('INDIA') && 
-                  !line.includes('Aadhaar') &&
-                  !line.includes('Unique') &&
-                  !line.includes('Identification')) {
-                foundName = line;
-                break;
-              }
-            }
-          }
-        }
-        
-        if (foundName && !document.getElementById('name').value) {
-          document.getElementById('name').value = foundName;
+        if (extractedName && !document.getElementById('name').value) {
+          document.getElementById('name').value = extractedName;
         }
         
         await worker.terminate();
         
-        if (foundName || aadhaarMatch) {
+        if (extractedName || aadhaarMatch) {
           ocrStatus.textContent = 'OCR Complete! Name and Aadhaar extracted.';
           setTimeout(() => {
             ocrStatus.style.display = 'none';
@@ -519,7 +538,6 @@
         await API.createVendorEntry({
           name: document.getElementById('name').value,
           mobile: document.getElementById('mobile').value,
-          purpose: document.getElementById('purpose').value,
           companyName: document.getElementById('companyName').value || null,
           aadhaarNumber: storedAadhaar,
           aadhaarFront: aadhaarFrontBase64,
