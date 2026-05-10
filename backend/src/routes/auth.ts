@@ -19,7 +19,7 @@ authRouter.post('/login', async (c) => {
   }
 
   const user = await c.env.DB.prepare(
-    'SELECT id, username, password_hash, role, gate_number FROM users WHERE username = ?'
+    'SELECT id, username, password_hash, role, gate_name FROM users WHERE username = ?'
   ).bind(username).first()
 
   if (!user) {
@@ -32,7 +32,13 @@ authRouter.post('/login', async (c) => {
   }
 
   const token = await sign(
-    { userId: user.id, username: user.username, role: user.role, exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 },
+    { 
+      userId: user.id, 
+      username: user.username, 
+      role: user.role === 'admin' ? 'Admin' : user.role === 'gate' ? 'Gate' : user.role,
+      gateNumber: user.gate_name,
+      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 
+    },
     c.env.JWT_SECRET
   )
 
@@ -41,8 +47,8 @@ authRouter.post('/login', async (c) => {
     user: {
       id: user.id,
       username: user.username,
-      role: user.role,
-      gateNumber: user.gate_number
+      role: user.role === 'admin' ? 'Admin' : user.role === 'gate' ? 'Gate' : user.role,
+      gateNumber: user.gate_name
     }
   })
 })
