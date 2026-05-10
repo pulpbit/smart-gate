@@ -121,43 +121,55 @@
       <p>Select a module to get started</p>
     </div>
 
-    <div class="cards">
-      <a href="material-inward.html" class="card">
-        <div class="icon inward">📥</div>
-        <h3>Material Inward</h3>
-        <p>Register incoming materials with DC details</p>
-      </a>
+     <div class="cards">
+       <a href="material-inward.html" class="card" id="inwardEntryCard">
+         <div class="icon inward">📥</div>
+         <h3>Material Inward</h3>
+         <p>Register incoming materials with DC details</p>
+       </a>
 
-      <a href="material-outward.html" class="card">
-        <div class="icon outward">📤</div>
-        <h3>Material Outward</h3>
-        <p>Register outgoing materials with DC details</p>
-      </a>
+       <a href="material-outward.html" class="card" id="outwardEntryCard">
+         <div class="icon outward">📤</div>
+         <h3>Material Outward</h3>
+         <p>Register outgoing materials with DC details</p>
+       </a>
 
-      <a href="vendor-entry.html" class="card">
-        <div class="icon vendor">👤</div>
-        <h3>Vendor Entry</h3>
-        <p>Register visitors with Aadhaar verification</p>
-      </a>
+       <a href="material-inward-list.html" class="card" id="inwardListCard" style="display: none;">
+         <div class="icon inward">📥</div>
+         <h3>Material Inward List</h3>
+         <p>View all incoming material entries</p>
+       </a>
 
-      <a href="vehicle-entry.html" class="card">
-        <div class="icon vehicle">🚗</div>
-        <h3>Vehicle Entry</h3>
-        <p>Register vehicles entering the premises</p>
-      </a>
+       <a href="material-outward-list.html" class="card" id="outwardListCard" style="display: none;">
+         <div class="icon outward">📤</div>
+         <h3>Material Outward List</h3>
+         <p>View all outgoing material entries</p>
+       </a>
 
-      <a href="vendor-list.html" class="card">
-        <div class="icon list">📋</div>
-        <h3>Vendor/Vehicle List</h3>
-        <p>View and manage entries with exit tracking</p>
-      </a>
+       <a href="vendor-entry.html" class="card" id="vendorEntryCard">
+         <div class="icon vendor">👤</div>
+         <h3>Vendor Entry</h3>
+         <p>Register visitors with Aadhaar verification</p>
+       </a>
 
-      <a href="user-management.html" class="card" id="usersCard">
-        <div class="icon users">👥</div>
-        <h3>User Management</h3>
-        <p>Admin only - Manage gate users</p>
-      </a>
-    </div>
+       <a href="vehicle-entry.html" class="card" id="vehicleEntryCard">
+         <div class="icon vehicle">🚗</div>
+         <h3>Vehicle Entry</h3>
+         <p>Register vehicles entering the premises</p>
+       </a>
+
+       <a href="vendor-list.html" class="card">
+         <div class="icon list">📋</div>
+         <h3>Vendor/Vehicle List</h3>
+         <p>View and manage entries with exit tracking</p>
+       </a>
+
+       <a href="user-management.html" class="card" id="usersCard">
+         <div class="icon users">👥</div>
+         <h3>User Management</h3>
+         <p>Admin only - Manage gate users</p>
+       </a>
+     </div>
   </div>
 
   <script src="./js/api.js"></script>
@@ -169,11 +181,18 @@
       window.location.href = 'index.html';
     }
 
-    document.getElementById('currentUser').textContent = user.username + ` (${user.role})`;
+     document.getElementById('currentUser').textContent = user.username + ` (${user.role})`;
 
-    if (user.role !== 'Admin') {
-      document.getElementById('usersCard').style.display = 'none';
-    }
+     if (user.role === 'Admin') {
+       document.getElementById('inwardEntryCard').style.display = 'none';
+       document.getElementById('outwardEntryCard').style.display = 'none';
+       document.getElementById('vendorEntryCard').style.display = 'none';
+       document.getElementById('vehicleEntryCard').style.display = 'none';
+       document.getElementById('inwardListCard').style.display = 'block';
+       document.getElementById('outwardListCard').style.display = 'block';
+     } else {
+       document.getElementById('usersCard').style.display = 'none';
+     }
 
     document.getElementById('logoutBtn').addEventListener('click', () => {
       localStorage.removeItem('token');
