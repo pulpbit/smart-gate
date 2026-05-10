@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Material Inward - Smart Gate Security</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f7fafc;
+      min-height: 100vh;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 {
+      font-size: 20px;
+      font-weight: 600;
+    }
+    .back-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: none;
+    }
+    .container {
+      max-width: 600px;
+      margin: 32px auto;
+      padding: 0 16px;
+    }
+    .form-container {
+      background: white;
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .form-container h2 {
+      color: #1a1a1a;
+      margin-bottom: 24px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #4a5568;
+      font-weight: 500;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+    }
+    .success {
+      background: #c6f6d5;
+      color: #276749;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .error {
+      background: #fed7d7;
+      color: #c53030;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .file-upload {
+      border: 2px dashed #e2e8f0;
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .file-upload:hover {
+      border-color: #667eea;
+    }
+    .file-upload input {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Material Inward</h1>
+    <a href="dashboard.html" class="back-btn">Back to Dashboard</a>
+  </div>
+
+  <div class="container">
+    <div class="form-container">
+      <h2>Register Inward Material</h2>
+      <div class="success" id="successMsg">Entry created successfully!</div>
+      <div class="error" id="errorMsg"></div>
+      <form id="inwardForm">
+        <div class="form-group">
+          <label for="dcNumber">DC Number *</label>
+          <input type="text" id="dcNumber" placeholder="Enter DC number" required>
+        </div>
+
+        <div class="form-group">
+          <label for="dcDate">DC Date *</label>
+          <input type="date" id="dcDate" required>
+        </div>
+
+        <div class="form-group">
+          <label for="vendorName">Vendor Name *</label>
+          <input type="text" id="vendorName" placeholder="Enter vendor name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="materialDescription">Material Description *</label>
+          <select id="materialDescription" required>
+            <option value="">Select material description</option>
+            <option value="As per attached DC">As per attached DC</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="vehicleNumber">Vehicle Number</label>
+          <input type="text" id="vehicleNumber" placeholder="Enter vehicle number">
+        </div>
+
+        <div class="form-group">
+          <label for="driverName">Driver Name</label>
+          <input type="text" id="driverName" placeholder="Enter driver name">
+        </div>
+
+        <div class="form-group">
+          <label for="driverMobile">Driver Mobile</label>
+          <input type="tel" id="driverMobile" placeholder="Enter mobile number">
+        </div>
+
+        <div class="form-group">
+          <label for="quantity">Quantity</label>
+          <input type="number" id="quantity" placeholder="Enter quantity">
+        </div>
+
+        <div class="form-group">
+          <label>DC Document (PDF only, max 10MB)</label>
+          <div class="file-upload" id="fileUpload">
+            <p>Click to upload or drag and drop</p>
+            <p style="color: #718096; font-size: 12px; margin-top: 8px;">PDF only, 10MB max</p>
+            <input type="file" id="document" accept=".pdf">
+          </div>
+          <p id="fileName" style="margin-top: 8px; color: #4a5568;"></p>
+        </div>
+
+        <button type="submit">Submit Entry</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="./js/api.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = 'index.html';
+    }
+
+    document.getElementById('dcDate').valueAsDate = new Date();
+
+    const fileUpload = document.getElementById('fileUpload');
+    const fileInput = document.getElementById('document');
+    const fileName = document.getElementById('fileName');
+
+    fileUpload.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        const file = e.target.files[0];
+        if (file.type !== 'application/pdf') {
+          alert('Only PDF files are allowed');
+          fileInput.value = '';
+          return;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+          alert('File size must be less than 10MB');
+          fileInput.value = '';
+          return;
+        }
+        fileName.textContent = file.name;
+      }
+    });
+
+    document.getElementById('inwardForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const successMsg = document.getElementById('successMsg');
+      const errorMsg = document.getElementById('errorMsg');
+      
+      successMsg.style.display = 'none';
+      errorMsg.style.display = 'none';
+
+      let documentBase64 = null;
+      const docFile = document.getElementById('document').files[0];
+      
+      if (docFile) {
+        documentBase64 = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result.split(',')[1]);
+          reader.readAsDataURL(docFile);
+        });
+      }
+
+      try {
+        await API.createMaterialInward({
+          dcNumber: document.getElementById('dcNumber').value,
+          dcDate: document.getElementById('dcDate').value,
+          vendorName: document.getElementById('vendorName').value,
+          materialDescription: document.getElementById('materialDescription').value,
+          vehicleNumber: document.getElementById('vehicleNumber').value || null,
+          driverName: document.getElementById('driverName').value || null,
+          driverMobile: document.getElementById('driverMobile').value || null,
+          quantity: document.getElementById('quantity').value ? parseInt(document.getElementById('quantity').value) : null,
+          document: documentBase64
+        });
+
+        successMsg.style.display = 'block';
+        e.target.reset();
+        document.getElementById('dcDate').valueAsDate = new Date();
+        fileName.textContent = '';
+      } catch (error) {
+        errorMsg.textContent = error.message || 'Failed to create entry';
+        errorMsg.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

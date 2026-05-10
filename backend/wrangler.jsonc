@@ -1,0 +1,15 @@
+{
+  "name": "smart-gate-backend",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-12-05",
+  "env": {
+    "JWT_SECRET": "your-super-secret-key-change-in-production"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "smart-gate-db",
+      "database_id": "72d342df-b45d-4dd8-9f82-ab6627207c64"
+    }
+  ]
+}

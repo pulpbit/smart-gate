@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Smart Gate Security</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f7fafc;
+      min-height: 100vh;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 {
+      font-size: 20px;
+      font-weight: 600;
+    }
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .logout-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .logout-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    .container {
+      max-width: 1200px;
+      margin: 32px auto;
+      padding: 0 16px;
+    }
+    .welcome {
+      margin-bottom: 32px;
+    }
+    .welcome h2 {
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+    .welcome p {
+      color: #4a5568;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+    .card h3 {
+      color: #1a1a1a;
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+    .card p {
+      color: #4a5568;
+      font-size: 14px;
+    }
+    .icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      font-size: 24px;
+    }
+    .inward { background: #bee3f8; color: #2b6cb0; }
+    .outward { background: #fed7d7; color: #c53030; }
+    .vendor { background: #fefcbf; color: #b7791f; }
+    .vehicle { background: #c6f6d5; color: #276749; }
+    .users { background: #e9d8fd; color: #6b46c1; }
+    .list { background: #fed7e2; color: #b83280; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Smart Gate Security System</h1>
+    <div class="user-info">
+      <span id="currentUser"></span>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="welcome">
+      <h2>Welcome back!</h2>
+      <p>Select a module to get started</p>
+    </div>
+
+    <div class="cards">
+      <a href="material-inward.html" class="card">
+        <div class="icon inward">📥</div>
+        <h3>Material Inward</h3>
+        <p>Register incoming materials with DC details</p>
+      </a>
+
+      <a href="material-outward.html" class="card">
+        <div class="icon outward">📤</div>
+        <h3>Material Outward</h3>
+        <p>Register outgoing materials with DC details</p>
+      </a>
+
+      <a href="vendor-entry.html" class="card">
+        <div class="icon vendor">👤</div>
+        <h3>Vendor Entry</h3>
+        <p>Register visitors with Aadhaar verification</p>
+      </a>
+
+      <a href="vehicle-entry.html" class="card">
+        <div class="icon vehicle">🚗</div>
+        <h3>Vehicle Entry</h3>
+        <p>Register vehicles entering the premises</p>
+      </a>
+
+      <a href="vendor-list.html" class="card">
+        <div class="icon list">📋</div>
+        <h3>Vendor/Vehicle List</h3>
+        <p>View and manage entries with exit tracking</p>
+      </a>
+
+      <a href="user-management.html" class="card" id="usersCard">
+        <div class="icon users">👥</div>
+        <h3>User Management</h3>
+        <p>Admin only - Manage gate users</p>
+      </a>
+    </div>
+  </div>
+
+  <script src="./js/api.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+    if (!token) {
+      window.location.href = 'index.html';
+    }
+
+    document.getElementById('currentUser').textContent = user.username + ` (${user.role})`;
+
+    if (user.role !== 'Admin') {
+      document.getElementById('usersCard').style.display = 'none';
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>

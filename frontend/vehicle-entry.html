@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vehicle Entry - Smart Gate Security</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f7fafc;
+      min-height: 100vh;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 {
+      font-size: 20px;
+      font-weight: 600;
+    }
+    .back-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: none;
+    }
+    .container {
+      max-width: 600px;
+      margin: 32px auto;
+      padding: 0 16px;
+    }
+    .form-container {
+      background: white;
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .form-container h2 {
+      color: #1a1a1a;
+      margin-bottom: 24px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #4a5568;
+      font-weight: 500;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+    }
+    .success {
+      background: #c6f6d5;
+      color: #276749;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .error {
+      background: #fed7d7;
+      color: #c53030;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Vehicle Entry</h1>
+    <a href="dashboard.html" class="back-btn">Back to Dashboard</a>
+  </div>
+
+  <div class="container">
+    <div class="form-container">
+      <h2>Register Vehicle Entry</h2>
+      <div class="success" id="successMsg">Entry created successfully!</div>
+      <div class="error" id="errorMsg"></div>
+      <form id="vehicleForm">
+        <div class="form-group">
+          <label for="vehicleNumber">Vehicle Number *</label>
+          <input type="text" id="vehicleNumber" placeholder="Enter vehicle number" required>
+        </div>
+
+        <div class="form-group">
+          <label for="driverName">Driver Name</label>
+          <input type="text" id="driverName" placeholder="Enter driver name">
+        </div>
+
+        <div class="form-group">
+          <label for="driverMobile">Driver Mobile</label>
+          <input type="tel" id="driverMobile" placeholder="Enter mobile number">
+        </div>
+
+        <div class="form-group">
+          <label for="vehicleType">Vehicle Type</label>
+          <select id="vehicleType">
+            <option value="">Select vehicle type</option>
+            <option value="Car">Car</option>
+            <option value="Truck">Truck</option>
+            <option value="Two Wheeler">Two Wheeler</option>
+            <option value="Bus">Bus</option>
+            <option value="Van">Van</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="companyName">Company Name</label>
+          <input type="text" id="companyName" placeholder="Enter company name">
+        </div>
+
+        <div class="form-group">
+          <label for="purpose">Purpose</label>
+          <select id="purpose">
+            <option value="">Select purpose</option>
+            <option value="Delivery">Delivery</option>
+            <option value="Pickup">Pickup</option>
+            <option value="Employee">Employee</option>
+            <option value="Visitor">Visitor</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <button type="submit">Submit Entry</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="./js/api.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = 'index.html';
+    }
+
+    document.getElementById('vehicleForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const successMsg = document.getElementById('successMsg');
+      const errorMsg = document.getElementById('errorMsg');
+      
+      successMsg.style.display = 'none';
+      errorMsg.style.display = 'none';
+
+      try {
+        await API.createVehicleEntry({
+          vehicleNumber: document.getElementById('vehicleNumber').value,
+          driverName: document.getElementById('driverName').value || null,
+          driverMobile: document.getElementById('driverMobile').value || null,
+          vehicleType: document.getElementById('vehicleType').value || null,
+          companyName: document.getElementById('companyName').value || null,
+          purpose: document.getElementById('purpose').value || null
+        });
+
+        successMsg.style.display = 'block';
+        e.target.reset();
+      } catch (error) {
+        errorMsg.textContent = error.message || 'Failed to create entry';
+        errorMsg.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

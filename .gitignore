@@ -28,3 +28,6 @@ dist-ssr
 *.d.ts
 *.js
 *.mjs
+
+# Wrangler
+.wrangler

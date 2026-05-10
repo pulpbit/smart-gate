@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendor/Vehicle List - Smart Gate Security</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f7fafc;
+      min-height: 100vh;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 {
+      font-size: 20px;
+      font-weight: 600;
+    }
+    .back-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: none;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 32px auto;
+      padding: 0 16px;
+    }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .tab {
+      padding: 12px 24px;
+      background: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: #4a5568;
+      transition: all 0.2s;
+    }
+    .tab.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .tab:hover:not(.active) {
+      background: #edf2f7;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 16px;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+    .status {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status.active {
+      background: #c6f6d5;
+      color: #276749;
+    }
+    .status.exited {
+      background: #fed7d7;
+      color: #c53030;
+    }
+    .card-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .detail {
+      display: flex;
+      flex-direction: column;
+    }
+    .detail-label {
+      font-size: 12px;
+      color: #718096;
+      margin-bottom: 4px;
+    }
+    .detail-value {
+      font-size: 14px;
+      color: #1a1a1a;
+      font-weight: 500;
+    }
+    .card-actions {
+      display: flex;
+      gap: 12px;
+      padding-top: 16px;
+      border-top: 1px solid #e2e8f0;
+    }
+    .exit-btn {
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .exit-btn:hover {
+      transform: translateY(-1px);
+    }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #718096;
+    }
+    .empty-state p {
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Vendor/Vehicle List</h1>
+    <a href="dashboard.html" class="back-btn">Back to Dashboard</a>
+  </div>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" id="vendorTab">Vendors</button>
+      <button class="tab" id="vehicleTab">Vehicles</button>
+    </div>
+
+    <div id="vendorSection">
+      <div id="vendorList"></div>
+    </div>
+
+    <div id="vehicleSection" style="display: none;">
+      <div id="vehicleList"></div>
+    </div>
+  </div>
+
+  <script src="./js/api.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = 'index.html';
+    }
+
+    let vendors = [];
+    let vehicles = [];
+
+    async function loadVendors() {
+      try {
+        vendors = await API.getVendors();
+        renderVendors();
+      } catch (error) {
+        console.error('Failed to load vendors:', error);
+      }
+    }
+
+    async function loadVehicles() {
+      try {
+        vehicles = await API.getVehicles();
+        renderVehicles();
+      } catch (error) {
+        console.error('Failed to load vehicles:', error);
+      }
+    }
+
+    function renderVendors() {
+      const container = document.getElementById('vendorList');
+      
+      if (vendors.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <h3>No vendor entries yet</h3>
+            <p>Register a vendor entry to see it here</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = vendors.map(vendor => `
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">${vendor.name}</div>
+              <div style="color: #718096; font-size: 14px; margin-top: 4px;">
+                ${vendor.company_name || 'No company'}
+              </div>
+            </div>
+            <span class="status ${vendor.exit_time ? 'exited' : 'active'}">
+              ${vendor.exit_time ? 'Exited' : 'Inside'}
+            </span>
+          </div>
+          <div class="card-details">
+            <div class="detail">
+              <span class="detail-label">Mobile</span>
+              <span class="detail-value">${vendor.mobile}</span>
+            </div>
+            <div class="detail">
+              <span class="detail-label">Purpose</span>
+              <span class="detail-value">${vendor.purpose}</span>
+            </div>
+            <div class="detail">
+              <span class="detail-label">Aadhaar</span>
+              <span class="detail-value">${vendor.aadhaar_number || 'N/A'}</span>
+            </div>
+            <div class="detail">
+              <span class="detail-label">Entry Time</span>
+              <span class="detail-value">${new Date(vendor.created_at).toLocaleString()}</span>
+            </div>
+            ${vendor.exit_time ? `
+              <div class="detail">
+                <span class="detail-label">Exit Time</span>
+                <span class="detail-value">${new Date(vendor.exit_time).toLocaleString()}</span>
+              </div>
+            ` : ''}
+            <div class="detail">
+              <span class="detail-label">Gate</span>
+              <span class="detail-value">${vendor.gate_number || 'N/A'}</span>
+            </div>
+          </div>
+          ${!vendor.exit_time ? `
+            <div class="card-actions">
+              <button class="exit-btn" onclick="markVendorExit(${vendor.id})">Mark Exit</button>
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+
+    function renderVehicles() {
+      const container = document.getElementById('vehicleList');
+      
+      if (vehicles.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <h3>No vehicle entries yet</h3>
+            <p>Register a vehicle entry to see it here</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = vehicles.map(vehicle => `
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">${vehicle.vehicle_number}</div>
+              <div style="color: #718096; font-size: 14px; margin-top: 4px;">
+                ${vehicle.vehicle_type || 'Vehicle'}
+              </div>
+            </div>
+            <span class="status ${vehicle.exit_time ? 'exited' : 'active'}">
+              ${vehicle.exit_time ? 'Exited' : 'Inside'}
+            </span>
+          </div>
+          <div class="card-details">
+            <div class="detail">
+              <span class="detail-label">Driver</span>
+              <span class="detail-value">${vehicle.driver_name || 'N/A'}</span>
+            </div>
+            <div class="detail">
+              <span class="detail-label">Mobile</span>
+              <span class="detail-value">${vehicle.driver_mobile || 'N/A'}</span>
+            </div>
+            <div class="detail">
+              <span class="detail-label">Company</span>
+              <span class="detail-value">${vehicle.company_name || 'N/A'}</span>
+            </div>
+            <div class="detail">
+              <span class="detail-label">Purpose</span>
+              <span class="detail-value">${vehicle.purpose || 'N/A'}</span>
+            </div>
+            <div class="detail">
+              <span class="detail-label">Entry Time</span>
+              <span class="detail-value">${new Date(vehicle.created_at).toLocaleString()}</span>
+            </div>
+            ${vehicle.exit_time ? `
+              <div class="detail">
+                <span class="detail-label">Exit Time</span>
+                <span class="detail-value">${new Date(vehicle.exit_time).toLocaleString()}</span>
+              </div>
+            ` : ''}
+            <div class="detail">
+              <span class="detail-label">Gate</span>
+              <span class="detail-value">${vehicle.gate_number || 'N/A'}</span>
+            </div>
+          </div>
+          ${!vehicle.exit_time ? `
+            <div class="card-actions">
+              <button class="exit-btn" onclick="markVehicleExit(${vehicle.id})">Mark Exit</button>
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+
+    async function markVendorExit(id) {
+      if (confirm('Mark this vendor as exited?')) {
+        try {
+          await API.vendorExit(id);
+          await loadVendors();
+        } catch (error) {
+          alert('Failed to mark exit: ' + error.message);
+        }
+      }
+    }
+
+    async function markVehicleExit(id) {
+      if (confirm('Mark this vehicle as exited?')) {
+        try {
+          await API.vehicleExit(id);
+          await loadVehicles();
+        } catch (error) {
+          alert('Failed to mark exit: ' + error.message);
+        }
+      }
+    }
+
+    document.getElementById('vendorTab').addEventListener('click', () => {
+      document.getElementById('vendorTab').classList.add('active');
+      document.getElementById('vehicleTab').classList.remove('active');
+      document.getElementById('vendorSection').style.display = 'block';
+      document.getElementById('vehicleSection').style.display = 'none';
+    });
+
+    document.getElementById('vehicleTab').addEventListener('click', () => {
+      document.getElementById('vehicleTab').classList.add('active');
+      document.getElementById('vendorTab').classList.remove('active');
+      document.getElementById('vehicleSection').style.display = 'block';
+      document.getElementById('vendorSection').style.display = 'none';
+    });
+
+    loadVendors();
+    loadVehicles();
+  </script>
+</body>
+</html>
