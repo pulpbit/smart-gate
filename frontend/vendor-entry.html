@@ -113,26 +113,32 @@
       width: 100%;
       max-width: 400px;
       margin: 0 auto 16px;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #000;
     }
     #cameraVideo {
       width: 100%;
-      border-radius: 8px;
-      background: #000;
+      height: 100%;
+      object-fit: cover;
     }
     #capturedCanvas {
       display: none;
       width: 100%;
-      border-radius: 8px;
+      height: 100%;
+      object-fit: cover;
     }
     .camera-controls {
       display: flex;
       gap: 12px;
       margin-bottom: 16px;
+      justify-content: center;
     }
     .camera-controls button {
-      flex: 1;
-      padding: 10px;
-      font-size: 14px;
+      width: auto;
+      padding: 12px 32px;
+      font-size: 16px;
     }
     .camera-controls .secondary-btn {
       background: linear-gradient(135deg, #718096 0%, #4a5568 100%);
@@ -149,10 +155,11 @@
       display: flex;
       gap: 16px;
       margin-top: 16px;
+      justify-content: center;
     }
     .aadhaar-preview img {
-      width: 100px;
-      height: 60px;
+      width: 120px;
+      height: 75px;
       object-fit: cover;
       border: 2px solid #e2e8f0;
       border-radius: 4px;
@@ -183,9 +190,10 @@
       margin-top: 16px;
       font-family: monospace;
       font-size: 12px;
-      max-height: 300px;
+      max-height: 400px;
       overflow-y: auto;
-      display: none;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
   </style>
 </head>
@@ -203,12 +211,11 @@
       <div id="cameraSection">
         <div class="scan-instructions">
           <h3>Scan Aadhaar Card</h3>
-          <p>Position the front of the Aadhaar card within the camera frame and click Capture</p>
+          <p>Position the front of the Aadhaar card within the frame and click Capture</p>
         </div>
         
         <div class="camera-controls">
-          <button type="button" id="startFrontCamera">Front Side</button>
-          <button type="button" id="startBackCamera">Back Side</button>
+          <button type="button" id="startCameraBtn">Start Camera</button>
         </div>
 
         <div class="camera-container">
@@ -216,22 +223,22 @@
           <canvas id="capturedCanvas"></canvas>
         </div>
 
-        <div class="camera-controls">
-          <button type="button" id="captureBtn" style="display: none;">Capture</button>
-          <button type="button" id="retakeBtn" style="display: none;">Retake</button>
-          <button type="button" id="stopCameraBtn" class="secondary-btn" style="display: none;">Stop Camera</button>
+        <div class="camera-controls" id="captureControls" style="display: none;">
+          <button type="button" id="captureBtn">Capture</button>
+          <button type="button" id="stopCameraBtn" class="secondary-btn">Stop</button>
+        </div>
+
+        <div class="camera-controls" id="retakeControls" style="display: none;">
+          <button type="button" id="retakeBtn">Retake</button>
+          <button type="button" id="stopCameraBtn2" class="secondary-btn">Stop</button>
         </div>
 
         <div class="ocr-status" id="ocrStatus">Processing OCR...</div>
 
         <div class="aadhaar-preview" id="aadhaarPreview" style="display: none;">
           <div>
-            <p style="font-size: 12px; margin-bottom: 4px; color: #4a5568;">Front Side</p>
-            <img id="frontPreview">
-          </div>
-          <div>
-            <p style="font-size: 12px; margin-bottom: 4px; color: #4a5568;">Back Side</p>
-            <img id="backPreview">
+            <p style="font-size: 12px; margin-bottom: 4px; color: #4a5568; text-align: center;">Captured Image</p>
+            <img id="capturedPreview">
           </div>
         </div>
 
@@ -278,16 +285,18 @@
     }
 
     let mediaStream = null;
-    let currentCaptureType = null;
     let aadhaarFrontBase64 = null;
-    let aadhaarBackBase64 = null;
     let fullAadhaarNumber = '';
 
     const video = document.getElementById('cameraVideo');
     const canvas = document.getElementById('capturedCanvas');
+    const startCameraBtn = document.getElementById('startCameraBtn');
     const captureBtn = document.getElementById('captureBtn');
     const retakeBtn = document.getElementById('retakeBtn');
     const stopCameraBtn = document.getElementById('stopCameraBtn');
+    const stopCameraBtn2 = document.getElementById('stopCameraBtn2');
+    const captureControls = document.getElementById('captureControls');
+    const retakeControls = document.getElementById('retakeControls');
     const ocrStatus = document.getElementById('ocrStatus');
     const cameraSection = document.getElementById('cameraSection');
     const vendorForm = document.getElementById('vendorForm');
@@ -298,8 +307,7 @@
     function logDebug(message) {
       console.log(message);
       if (DEBUG_MODE && debugInfo) {
-        debugInfo.style.display = 'block';
-        debugInfo.innerHTML += '<div>' + message + '</div>';
+        debugInfo.innerHTML += message + '\n';
       }
     }
 
@@ -315,14 +323,23 @@
           mediaStream.getTracks().forEach(track => track.stop());
         }
         
+        logDebug('=== Requesting camera access ===');
         mediaStream = await navigator.mediaDevices.getUserMedia({ 
-          video: { facingMode: 'environment' } 
+          video: { 
+            facingMode: 'environment',
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          } 
         });
+        
+        logDebug('Camera access granted');
         video.srcObject = mediaStream;
         
-        captureBtn.style.display = 'block';
-        stopCameraBtn.style.display = 'block';
+        startCameraBtn.style.display = 'none';
+        captureControls.style.display = 'flex';
+        
       } catch (error) {
+        logDebug('Camera error: ' + error.message);
         alert('Unable to access camera: ' + error.message);
       }
     }
@@ -335,30 +352,41 @@
       video.srcObject = null;
       canvas.style.display = 'none';
       video.style.display = 'block';
-      captureBtn.style.display = 'none';
-      retakeBtn.style.display = 'none';
-      stopCameraBtn.style.display = 'none';
+      startCameraBtn.style.display = 'block';
+      captureControls.style.display = 'none';
+      retakeControls.style.display = 'none';
     }
 
     function captureImage() {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      logDebug('=== Capturing image ===');
+      
+      const videoWidth = video.videoWidth;
+      const videoHeight = video.videoHeight;
+      
+      logDebug('Video dimensions: ' + videoWidth + 'x' + videoHeight);
+      
+      canvas.width = videoWidth;
+      canvas.height = videoHeight;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0);
       
       video.style.display = 'none';
       canvas.style.display = 'block';
-      captureBtn.style.display = 'none';
-      retakeBtn.style.display = 'block';
+      captureControls.style.display = 'none';
+      retakeControls.style.display = 'flex';
       
-      return canvas.toDataURL('image/jpeg', 0.8);
+      const imageData = canvas.toDataURL('image/jpeg', 0.9);
+      logDebug('Image captured (base64 length: ' + imageData.length + ')');
+      
+      return imageData;
     }
 
     function retake() {
       canvas.style.display = 'none';
       video.style.display = 'block';
-      captureBtn.style.display = 'block';
-      retakeBtn.style.display = 'none';
+      retakeControls.style.display = 'none';
+      captureControls.style.display = 'flex';
+      document.getElementById('aadhaarPreview').style.display = 'none';
     }
 
     function showForm() {
@@ -373,43 +401,47 @@
         .trim();
     }
 
-    function isExcluded(line) {
-      const lower = line.toLowerCase();
-      const excludedWords = [
-        'government', 'india', 'aadhaar', 'unique', 'identification', 'authority',
-        'uidai', 'govt', 'of', 'the', 'to', 'address', 'dob', 'date', 'birth',
-        'male', 'female', 'enrolment', 'enroll', 'vid', 'help', 'www', 'gov',
-        'in', '1947', 'care', 'contact', 'toll', 'free', 'issue', 'download',
-        'mobile', 'email', 'web', 'site', 'register', 'national', 'id', 'identity',
-        'card', 'resident', 'citizen', 'portal', 'public', 'private', 'limited',
-        'ltd', 'pvt', 'company', 'services', 'state', 'central', 'ministry',
-        'department', 'office', 'division', 'verify', 'verification', 'kyc',
-        'know', 'your', 'customer', 'client', 'resident', 'non-resident', 'nri',
-        'oci', 'pio', 'foreigner', 'father', 'mother', 'parent', 'guardian',
-        'spouse', 'wife', 'husband', 'son', 'daughter', 'child', 'relative',
-        'relation', 'address', 'street', 'road', 'lane', 'gali', 'mohalla',
-        'colony', 'sector', 'block', 'building', 'floor', 'flat', 'room', 'house',
-        'plot', 'survey', 'village', 'town', 'city', 'district', 'tehsil', 'taluk',
-        'state', 'country', 'pin', 'pincode', 'zip', 'code', 'postal', 'transgender',
-        'third', 'gender', 'sex', 'भारत', 'सरकार', 'आधार', 'पुरुष', 'महिला',
-        'जन्म', 'पता', 'महानिदेशालय', 'विभाग', 'कार्यालय', 'नाम', 'nama', 'nane', 'nam'
-      ];
-      
-      const excludedExact = [
-        'm', 'f', 'mr', 'mrs', 'ms', 'dr', 'prof', 'shri', 'smt', 'kum',
-        's/o', 'd/o', 'w/o', 'h/o', 'c/o', 'son of', 'daughter of', 'wife of',
-        'husband of', 'care of'
-      ];
+    const excludedWords = [
+      'government', 'india', 'aadhaar', 'aadhar', 'adhaar', 'adhar',
+      'unique', 'identification', 'authority', 'uidai', 'govt',
+      'of', 'the', 'to', 'and', 'or', 'by', 'for', 'in', 'on', 'at',
+      'address', 'dob', 'date', 'birth', 'male', 'female', 'transgender',
+      'enrolment', 'enroll', 'vid', 'help', 'www', 'gov', '1947',
+      'care', 'contact', 'toll', 'free', 'issue', 'download', 'mobile',
+      'email', 'web', 'site', 'register', 'national', 'id', 'identity',
+      'card', 'resident', 'citizen', 'portal', 'public', 'private', 'limited',
+      'ltd', 'pvt', 'company', 'services', 'state', 'central', 'ministry',
+      'department', 'office', 'division', 'verify', 'verification', 'kyc',
+      'know', 'your', 'customer', 'client', 'non-resident', 'nri',
+      'oci', 'pio', 'foreigner', 'father', 'mother', 'parent', 'guardian',
+      'spouse', 'wife', 'husband', 'son', 'daughter', 'child', 'relative',
+      'relation', 'street', 'road', 'lane', 'gali', 'mohalla',
+      'colony', 'sector', 'block', 'building', 'floor', 'flat', 'room', 'house',
+      'plot', 'survey', 'village', 'town', 'city', 'district', 'tehsil', 'taluk',
+      'country', 'pin', 'pincode', 'zip', 'code', 'postal', 'gender', 'sex',
+      'भारत', 'सरकार', 'आधार', 'पुरुष', 'महिला', 'जन्म', 'पता',
+      'महानिदेशालय', 'विभाग', 'कार्यालय', 'नाम', 'nama', 'nane', 'nam',
+      'माता', 'पिता', 'पत्नी', 'पति', 'पुत्र', 'पुत्री',
+      's/o', 'd/o', 'w/o', 'h/o', 'c/o', 'son of', 'daughter of', 'wife of',
+      'husband of', 'care of', 'mr', 'mrs', 'ms', 'dr', 'prof', 'shri', 'smt', 'kum',
+      'm/', 'f/', 'm:', 'f:', 'mr.', 'mrs.', 'ms.', 'dr.'
+    ];
 
-      if (excludedExact.includes(lower)) return true;
-      
+    function isExcluded(word) {
+      const lower = word.toLowerCase();
+      return excludedWords.includes(lower);
+    }
+
+    function hasExcludedWord(line) {
+      const lower = line.toLowerCase();
       for (const word of excludedWords) {
         if (lower.includes(word)) return true;
       }
-      
-      if (/^\d+$/.test(line)) return true;
-      
       return false;
+    }
+
+    function isDigitsOnly(line) {
+      return /^[\d\s]+$/.test(line);
     }
 
     function isPossibleName(line) {
@@ -418,21 +450,31 @@
       const cleaned = cleanLine(line);
       if (!cleaned || cleaned.length < 3) return false;
       
-      if (isExcluded(cleaned)) return false;
+      if (hasExcludedWord(cleaned)) return false;
+      if (isDigitsOnly(cleaned)) return false;
       
       const words = cleaned.split(/\s+/).filter(w => w.length > 1);
       
       if (words.length < 2 || words.length > 4) return false;
+      
+      for (const word of words) {
+        if (isExcluded(word)) return false;
+      }
       
       const hasDevanagari = /[\u0900-\u097F]/.test(cleaned);
       if (hasDevanagari) {
         return true;
       }
       
-      const allCaps = /^[A-Z\s]+$/.test(cleaned);
+      const allCaps = /^[A-Z\s\.]+$/.test(cleaned);
       const titleCase = /^[A-Z][a-z]+(\s+[A-Z][a-z]+)+$/.test(cleaned);
+      const mixedCase = /^[A-Za-z\s\.]+$/.test(cleaned);
       
       if (allCaps || titleCase) {
+        return true;
+      }
+      
+      if (mixedCase && words.length >= 2) {
         return true;
       }
       
@@ -440,6 +482,7 @@
     }
 
     function extractNameFromText(text) {
+      logDebug('');
       logDebug('=== Starting Name Extraction ===');
       logDebug('Raw text length: ' + text.length);
       
@@ -447,6 +490,7 @@
         .map(line => line.trim())
         .filter(line => line.length > 2);
       
+      logDebug('');
       logDebug('Number of lines: ' + lines.length);
       lines.forEach((line, i) => {
         logDebug('Line ' + i + ': "' + line + '"');
@@ -465,19 +509,22 @@
           if (nameKeywordIndex === -1) nameKeywordIndex = i;
         }
         
-        if (line.includes('dob') || line.includes('birth') || line.includes('जन्म') || line.includes('date')) {
+        if (line.includes('dob') || line.includes('birth') || line.includes('जन्म') || 
+            (line.includes('date') && line.includes('/'))) {
           if (dobIndex === -1) dobIndex = i;
         }
         
-        if (line.includes('male') || line.includes('female') || line.includes('पुरुष') || line.includes('महिला')) {
+        if (line.includes('male') || line.includes('female') || line.includes('पुरुष') || 
+            line.includes('महिला') || line.includes('transgender')) {
           if (genderIndex === -1) genderIndex = i;
         }
         
-        if (line.includes('uidai') || line.includes('unique')) {
+        if (line.includes('uidai') || line.includes('unique') || line.includes('identification')) {
           if (uidaiIndex === -1) uidaiIndex = i;
         }
         
-        if (line.includes('government') || line.includes('भारत') || line.includes('सरकार')) {
+        if (line.includes('government') || line.includes('भारत') || line.includes('सरकार') ||
+            line.includes('govt') || line.includes('india')) {
           if (govtIndex === -1) govtIndex = i;
         }
       }
@@ -507,8 +554,8 @@
           if (match) {
             const candidate = cleanLine(match[1]);
             logDebug('Pattern match: "' + candidate + '"');
-            if (!isExcluded(candidate) && candidate.length > 3) {
-              logDebug('Found name after keyword: "' + candidate + '"');
+            if (!hasExcludedWord(candidate) && candidate.length > 3) {
+              logDebug('** FOUND NAME after keyword: "' + candidate + '" **');
               return candidate;
             }
           }
@@ -519,10 +566,10 @@
           const candidate = cleanLine(nextLine);
           logDebug('Next line after keyword: "' + candidate + '"');
           
-          if (!isExcluded(candidate) && candidate.length > 3) {
+          if (!hasExcludedWord(candidate) && candidate.length > 3) {
             const words = candidate.split(/\s+/).filter(w => w.length > 1);
             if (words.length >= 2 && words.length <= 4) {
-              logDebug('Found name on next line: "' + candidate + '"');
+              logDebug('** FOUND NAME on next line: "' + candidate + '" **');
               return candidate;
             }
           }
@@ -546,24 +593,25 @@
         
         if (isPossibleName(line)) {
           const candidate = cleanLine(line);
-          logDebug('Possible name found: "' + candidate + '"');
+          logDebug('** FOUND NAME in search range: "' + candidate + '" **');
           return candidate;
         }
       }
 
       logDebug('');
-      logDebug('=== Fallback: searching all lines ===');
+      logDebug('=== Looking for lines with 2-4 words (no digits) ===');
       
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         
         if (isPossibleName(line)) {
           const candidate = cleanLine(line);
-          logDebug('Fallback name found: "' + candidate + '"');
+          logDebug('** FOUND NAME in fallback: "' + candidate + '" **');
           return candidate;
         }
       }
 
+      logDebug('');
       logDebug('No name found in OCR text');
       return null;
     }
@@ -572,33 +620,37 @@
       ocrStatus.style.display = 'block';
       ocrStatus.textContent = 'Processing OCR...';
       
-      if (debugInfo) {
-        debugInfo.innerHTML = '';
-      }
-      
       try {
+        logDebug('');
         logDebug('=== OCR Started ===');
         
+        logDebug('Initializing Tesseract worker...');
         const worker = await Tesseract.createWorker('eng');
+        logDebug('Worker initialized');
+        
+        logDebug('Running recognition...');
         const ret = await worker.recognize(imageData);
+        logDebug('Recognition complete');
         
         const text = ret.data.text;
         logDebug('');
         logDebug('=== Full OCR Text ===');
         logDebug(text);
-        logDebug('');
+        logDebug('==================');
         
         const aadhaarRegex = /\d{4}\s*\d{4}\s*\d{4}/;
         const aadhaarMatch = text.match(aadhaarRegex);
         
         if (aadhaarMatch) {
+          logDebug('');
           logDebug('Aadhaar number found: ' + aadhaarMatch[0]);
           fullAadhaarNumber = aadhaarMatch[0].replace(/\s/g, '');
           const lastFour = fullAadhaarNumber.slice(-4);
           document.getElementById('aadhaarNumber').value = lastFour;
           logDebug('Last 4 digits: ' + lastFour);
         } else {
-          logDebug('No Aadhaar number found');
+          logDebug('');
+          logDebug('No Aadhaar number found in OCR');
         }
         
         const extractedName = extractNameFromText(text);
@@ -607,9 +659,14 @@
         
         if (extractedName && !document.getElementById('name').value) {
           document.getElementById('name').value = extractedName;
+          logDebug('Name field populated with: "' + extractedName + '"');
+        } else if (!extractedName) {
+          logDebug('No name extracted, user will need to enter manually');
         }
         
+        logDebug('Terminating Tesseract worker...');
         await worker.terminate();
+        logDebug('Worker terminated');
         
         if (extractedName || aadhaarMatch) {
           ocrStatus.textContent = 'OCR Complete!';
@@ -626,7 +683,9 @@
         }
         
       } catch (error) {
-        logDebug('OCR Error: ' + error.message);
+        logDebug('');
+        logDebug('*** OCR Error ***');
+        logDebug('Message: ' + error.message);
         logDebug('Stack: ' + error.stack);
         console.error('OCR Error:', error);
         ocrStatus.textContent = 'OCR failed - you can enter details manually';
@@ -637,13 +696,7 @@
       }
     }
 
-    document.getElementById('startFrontCamera').addEventListener('click', async () => {
-      currentCaptureType = 'front';
-      await startCamera();
-    });
-
-    document.getElementById('startBackCamera').addEventListener('click', async () => {
-      currentCaptureType = 'back';
+    startCameraBtn.addEventListener('click', async () => {
       await startCamera();
     });
 
@@ -651,23 +704,16 @@
       const imageData = captureImage();
       const base64 = imageData.split(',')[1];
       
-      if (currentCaptureType === 'front') {
-        aadhaarFrontBase64 = base64;
-        document.getElementById('frontPreview').src = imageData;
-      } else {
-        aadhaarBackBase64 = base64;
-        document.getElementById('backPreview').src = imageData;
-      }
-      
+      aadhaarFrontBase64 = base64;
+      document.getElementById('capturedPreview').src = imageData;
       document.getElementById('aadhaarPreview').style.display = 'flex';
       
-      if (currentCaptureType === 'front') {
-        performOCR(imageData);
-      }
+      performOCR(imageData);
     });
 
     retakeBtn.addEventListener('click', retake);
     stopCameraBtn.addEventListener('click', stopCamera);
+    stopCameraBtn2.addEventListener('click', stopCamera);
 
     document.getElementById('skipScanBtn').addEventListener('click', () => {
       stopCamera();
@@ -694,6 +740,7 @@
           }
         }
 
+        logDebug('');
         logDebug('=== Submitting vendor entry ===');
         logDebug('Name: ' + document.getElementById('name').value);
         logDebug('Mobile: ' + document.getElementById('mobile').value);
@@ -706,23 +753,23 @@
           companyName: document.getElementById('companyName').value || null,
           aadhaarNumber: storedAadhaar,
           aadhaarFront: aadhaarFrontBase64,
-          aadhaarBack: aadhaarBackBase64
+          aadhaarBack: null
         });
 
         successMsg.style.display = 'block';
         e.target.reset();
         aadhaarFrontBase64 = null;
-        aadhaarBackBase64 = null;
         fullAadhaarNumber = '';
         document.getElementById('aadhaarPreview').style.display = 'none';
-        document.getElementById('frontPreview').src = '';
-        document.getElementById('backPreview').src = '';
+        document.getElementById('capturedPreview').src = '';
         
         setTimeout(() => {
           window.location.href = 'dashboard.html';
         }, 2000);
       } catch (error) {
-        logDebug('Submit Error: ' + error.message);
+        logDebug('');
+        logDebug('*** Submit Error ***');
+        logDebug('Message: ' + error.message);
         errorMsg.textContent = error.message || 'Failed to create entry';
         errorMsg.style.display = 'block';
       }

@@ -9,7 +9,10 @@ type Env = {
 
 function authMiddleware() {
   return async (c: Context<Env>, next: Next) => {
-    const jwtMiddleware = jwt({ secret: c.env.JWT_SECRET })
+    const jwtMiddleware = jwt({ 
+      secret: c.env.JWT_SECRET,
+      alg: 'HS256'
+    })
     await jwtMiddleware(c, next)
   }
 }
