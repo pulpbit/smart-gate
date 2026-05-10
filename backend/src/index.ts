@@ -19,6 +19,15 @@ const app = new Hono<Env>()
 app.use('*', logger())
 app.use('*', cors())
 
+app.onError((err, c) => {
+  console.error('Global error:', err)
+  return c.json({ error: 'Internal Server Error: ' + err.message }, 500)
+})
+
+app.notFound((c) => {
+  return c.json({ error: 'Not Found' }, 404)
+})
+
 app.route('/api/auth', authRouter)
 app.route('/api/material', materialRouter)
 app.route('/api/vendor', vendorRouter)

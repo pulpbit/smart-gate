@@ -175,10 +175,17 @@
     #vendorForm {
       display: none;
     }
-    .form-divider {
-      border-top: 1px solid #e2e8f0;
-      margin: 24px 0;
-      padding-top: 24px;
+    .debug-info {
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 16px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+      display: none;
     }
   </style>
 </head>
@@ -227,6 +234,8 @@
             <img id="backPreview">
           </div>
         </div>
+
+        <div class="debug-info" id="debugInfo"></div>
 
         <div style="margin-top: 20px; text-align: center;">
           <button type="button" id="skipScanBtn" class="secondary-btn" style="width: auto; padding: 10px 24px;">Skip Scan & Enter Manually</button>
@@ -282,6 +291,17 @@
     const ocrStatus = document.getElementById('ocrStatus');
     const cameraSection = document.getElementById('cameraSection');
     const vendorForm = document.getElementById('vendorForm');
+    const debugInfo = document.getElementById('debugInfo');
+
+    const DEBUG_MODE = true;
+
+    function logDebug(message) {
+      console.log(message);
+      if (DEBUG_MODE && debugInfo) {
+        debugInfo.style.display = 'block';
+        debugInfo.innerHTML += '<div>' + message + '</div>';
+      }
+    }
 
     document.getElementById('aadhaarNumber').addEventListener('input', (e) => {
       let value = e.target.value.replace(/\D/g, '');
@@ -346,59 +366,104 @@
       vendorForm.style.display = 'block';
     }
 
-    function extractNameFromText(text) {
-      const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 2);
-      
-      console.log('OCR Lines:', lines);
-      
+    function cleanLine(line) {
+      return line.trim()
+        .replace(/[^A-Za-z\u0900-\u097F\s\.\-\']/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function isExcluded(line) {
+      const lower = line.toLowerCase();
       const excludedWords = [
         'government', 'india', 'aadhaar', 'unique', 'identification', 'authority',
-        'महानिदेशालय', 'आधार', 'भारत', 'सरकार', 'govt', 'of', 'the', 'to',
-        'address', 'पता', 'dob', 'date', 'birth', 'जन्म', 'male', 'female',
-        'पुरुष', 'महिला', 'm', 'f', 'enrolment', 'enroll', 'vid', 'help',
-        'uidai', 'www', 'gov', 'in', '1947', 'care', 'contact', 'toll', 'free',
-        'issue', 'download', 'mobile', 'email', 'web', 'site', 'register',
-        'national', 'id', 'identity', 'card', 'resident', 'citizen', 'portal',
-        'public', 'private', 'limited', 'ltd', 'pvt', 'company', 'services',
-        'state', 'central', 'ministry', 'department', 'office', 'division',
-        'भारत सरकार', 'unique identification', 'uidai', 'help@uidai', '1947',
-        'issuing', 'authority', 'bharat', 'sarkar', 'कार्यालय', 'विभाग',
-        'पत्र', 'अधिकार', 'नियम', 'नियमन', 'पंजीकरण', 'पंजीकृत',
-        'downloaded', 'from', 'this', 'is', 'your', 'for', 'and', 'or', 'by',
-        'with', 'without', 'not', 'no', 'yes', 'true', 'false', 'valid',
-        'invalid', 'expired', 'fresh', 'new', 'old', 'original', 'copy',
-        'duplicate', 'reprint', 'reissue', 'update', 'updation', 'correction',
-        'change', 'request', 'application', 'form', 'acknowledgment', 'slip',
-        'receipt', 'number', 'code', 'reference', 'transaction', 'id',
-        'generated', 'printed', 'on', 'at', 'time', 'day', 'month', 'year',
-        'verify', 'verification', 'kyc', 'know', 'your', 'customer', 'client',
-        'resident', 'non-resident', 'nri', 'oci', 'pio', 'foreigner',
-        'name', 'नाम', 'nama', 'nane', 'nam', 'father', 'माता', 'मातृ',
-        'mother', 'पिता', 'पितृ', 'parent', 'guardian', 'spouse', 'wife',
-        'husband', 'son', 'daughter', 'child', 'relative', 'relation',
-        'address', 'पता', 'address1', 'address2', 'address3', 'street',
-        'road', 'lane', 'gali', 'mohalla', 'colony', 'sector', 'block',
-        'building', 'floor', 'flat', 'room', 'house', 'plot', 'survey',
-        'village', 'town', 'city', 'district', 'tehsil', 'taluk', 'state',
-        'country', 'india', 'pin', 'pincode', 'zip', 'code', 'postal',
-        'male', 'पुरुष', 'purush', 'female', 'महिला', 'mahila', 'transgender',
-        'third', 'gender', 'sex', 'm/', 'f/', 'm:', 'f:', 'trans'
+        'uidai', 'govt', 'of', 'the', 'to', 'address', 'dob', 'date', 'birth',
+        'male', 'female', 'enrolment', 'enroll', 'vid', 'help', 'www', 'gov',
+        'in', '1947', 'care', 'contact', 'toll', 'free', 'issue', 'download',
+        'mobile', 'email', 'web', 'site', 'register', 'national', 'id', 'identity',
+        'card', 'resident', 'citizen', 'portal', 'public', 'private', 'limited',
+        'ltd', 'pvt', 'company', 'services', 'state', 'central', 'ministry',
+        'department', 'office', 'division', 'verify', 'verification', 'kyc',
+        'know', 'your', 'customer', 'client', 'resident', 'non-resident', 'nri',
+        'oci', 'pio', 'foreigner', 'father', 'mother', 'parent', 'guardian',
+        'spouse', 'wife', 'husband', 'son', 'daughter', 'child', 'relative',
+        'relation', 'address', 'street', 'road', 'lane', 'gali', 'mohalla',
+        'colony', 'sector', 'block', 'building', 'floor', 'flat', 'room', 'house',
+        'plot', 'survey', 'village', 'town', 'city', 'district', 'tehsil', 'taluk',
+        'state', 'country', 'pin', 'pincode', 'zip', 'code', 'postal', 'transgender',
+        'third', 'gender', 'sex', 'भारत', 'सरकार', 'आधार', 'पुरुष', 'महिला',
+        'जन्म', 'पता', 'महानिदेशालय', 'विभाग', 'कार्यालय', 'नाम', 'nama', 'nane', 'nam'
       ];
       
       const excludedExact = [
         'm', 'f', 'mr', 'mrs', 'ms', 'dr', 'prof', 'shri', 'smt', 'kum',
-        's/o', 'd/o', 'w/o', 'h/o', 'son of', 'daughter of', 'wife of', 'husband of',
-        'c/o', 'care of', 's/o:', 'd/o:', 'w/o:', 'h/o:', 'c/o:'
+        's/o', 'd/o', 'w/o', 'h/o', 'c/o', 'son of', 'daughter of', 'wife of',
+        'husband of', 'care of'
       ];
 
+      if (excludedExact.includes(lower)) return true;
+      
+      for (const word of excludedWords) {
+        if (lower.includes(word)) return true;
+      }
+      
+      if (/^\d+$/.test(line)) return true;
+      
+      return false;
+    }
+
+    function isPossibleName(line) {
+      if (!line || line.length < 3) return false;
+      
+      const cleaned = cleanLine(line);
+      if (!cleaned || cleaned.length < 3) return false;
+      
+      if (isExcluded(cleaned)) return false;
+      
+      const words = cleaned.split(/\s+/).filter(w => w.length > 1);
+      
+      if (words.length < 2 || words.length > 4) return false;
+      
+      const hasDevanagari = /[\u0900-\u097F]/.test(cleaned);
+      if (hasDevanagari) {
+        return true;
+      }
+      
+      const allCaps = /^[A-Z\s]+$/.test(cleaned);
+      const titleCase = /^[A-Z][a-z]+(\s+[A-Z][a-z]+)+$/.test(cleaned);
+      
+      if (allCaps || titleCase) {
+        return true;
+      }
+      
+      return false;
+    }
+
+    function extractNameFromText(text) {
+      logDebug('=== Starting Name Extraction ===');
+      logDebug('Raw text length: ' + text.length);
+      
+      const lines = text.split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 2);
+      
+      logDebug('Number of lines: ' + lines.length);
+      lines.forEach((line, i) => {
+        logDebug('Line ' + i + ': "' + line + '"');
+      });
+
+      let nameKeywordIndex = -1;
       let dobIndex = -1;
       let genderIndex = -1;
-      let nameKeywordIndex = -1;
       let uidaiIndex = -1;
       let govtIndex = -1;
       
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i].toLowerCase();
+        
+        if (line.includes('name') || line.includes('नाम') || line.includes('nama') || line.includes('nane')) {
+          if (nameKeywordIndex === -1) nameKeywordIndex = i;
+        }
         
         if (line.includes('dob') || line.includes('birth') || line.includes('जन्म') || line.includes('date')) {
           if (dobIndex === -1) dobIndex = i;
@@ -406,10 +471,6 @@
         
         if (line.includes('male') || line.includes('female') || line.includes('पुरुष') || line.includes('महिला')) {
           if (genderIndex === -1) genderIndex = i;
-        }
-        
-        if (line.includes('name') || line.includes('नाम') || line.includes('nama') || line.includes('nane')) {
-          if (nameKeywordIndex === -1) nameKeywordIndex = i;
         }
         
         if (line.includes('uidai') || line.includes('unique')) {
@@ -421,131 +482,89 @@
         }
       }
 
-      console.log('Indices - dob:', dobIndex, 'gender:', genderIndex, 'nameKeyword:', nameKeywordIndex, 'uidai:', uidaiIndex, 'govt:', govtIndex);
+      logDebug('');
+      logDebug('Key indices:');
+      logDebug('  nameKeywordIndex: ' + nameKeywordIndex);
+      logDebug('  dobIndex: ' + dobIndex);
+      logDebug('  genderIndex: ' + genderIndex);
+      logDebug('  uidaiIndex: ' + uidaiIndex);
+      logDebug('  govtIndex: ' + govtIndex);
 
       if (nameKeywordIndex !== -1) {
+        logDebug('');
+        logDebug('=== Checking Name keyword at index ' + nameKeywordIndex + ' ===');
+        
         const line = lines[nameKeywordIndex];
-        const lineLower = line.toLowerCase();
+        logDebug('Line with keyword: "' + line + '"');
         
-        const match = line.match(/(?:name|नाम|nama|nane|nam)\s*[:\/\-\s]\s*([A-Za-z\u0900-\u097F\s]{3,})/i);
-        if (match) {
-          let candidate = match[1].trim();
-          const candidateLower = candidate.toLowerCase();
-          
-          if (!excludedWords.some(w => candidateLower.includes(w)) && 
-              !excludedExact.includes(candidateLower) &&
-              candidate.length > 3) {
-            const cleanName = candidate.replace(/[^A-Za-z\u0900-\u097F\s]/g, '').trim();
-            if (cleanName.length > 3) {
-              console.log('Found name after keyword:', cleanName);
-              return cleanName;
-            }
-          }
-        }
-        
-        if (nameKeywordIndex + 1 < lines.length) {
-          let candidate = lines[nameKeywordIndex + 1].trim();
-          const candidateLower = candidate.toLowerCase();
-          
-          if (!excludedWords.some(w => candidateLower.includes(w)) && 
-              !excludedExact.includes(candidateLower) &&
-              candidate.length > 3 &&
-              (dobIndex === -1 || nameKeywordIndex + 1 < dobIndex)) {
-            const cleanName = candidate.replace(/[^A-Za-z\u0900-\u097F\s]/g, '').trim();
-            if (cleanName.length > 3) {
-              console.log('Found name on next line:', cleanName);
-              return cleanName;
-            }
-          }
-        }
-      }
-
-      const startSearch = Math.max(uidaiIndex, govtIndex, -1) + 1;
-      const endSearch = Math.min(
-        dobIndex !== -1 ? dobIndex : lines.length,
-        genderIndex !== -1 ? genderIndex : lines.length
-      );
-
-      console.log('Searching between lines', startSearch, 'and', endSearch);
-
-      for (let i = startSearch; i < endSearch && i < lines.length; i++) {
-        let line = lines[i].trim();
-        const lineLower = line.toLowerCase();
-        
-        if (excludedWords.some(w => lineLower.includes(w))) {
-          console.log('Skipping line (has excluded word):', line);
-          continue;
-        }
-        
-        if (lineLower.match(/^\d+[\s\d]*$/)) {
-          console.log('Skipping line (all digits):', line);
-          continue;
-        }
-        
-        const hasDigits = /\d/.test(line);
-        const hasSpecial = /[^A-Za-z\u0900-\u097F\s\.\-\']/.test(line);
-        
-        if (hasDigits && !hasSpecial) {
-          console.log('Skipping line (has digits):', line);
-          continue;
-        }
-        
-        const namePatterns = [
-          /^([A-Z][a-z]{2,}\s+[A-Z][a-z]{2,}(?:\s+[A-Z][a-z]{0,})?)$/,
-          /^([A-Z]{3,}\s+[A-Z]{3,}(?:\s+[A-Z]{2,})?)$/,
-          /^([A-Za-z]{2,}\s+[A-Za-z]{2,}(?:\s+[A-Za-z]{2,})?)$/,
-          /^([\u0900-\u097F]{2,}\s+[\u0900-\u097F]{2,}(?:\s+[\u0900-\u097F]{2,})?)$/
+        const patterns = [
+          /(?:name|नाम|nama|nane|nam)\s*[:\/\-\s]\s*([A-Za-z\u0900-\u097F\s\.]{3,})/i,
+          /(?:name|नाम|nama|nane|nam)\s+([A-Za-z\u0900-\u097F\s\.]{3,})/i
         ];
         
-        for (const pattern of namePatterns) {
+        for (const pattern of patterns) {
           const match = line.match(pattern);
           if (match) {
-            const candidate = match[1].trim();
-            const candidateLower = candidate.toLowerCase();
-            
-            if (!excludedWords.some(w => candidateLower.includes(w)) && 
-                !excludedExact.includes(candidateLower) &&
-                candidate.length > 5) {
-              console.log('Found name with pattern:', candidate);
+            const candidate = cleanLine(match[1]);
+            logDebug('Pattern match: "' + candidate + '"');
+            if (!isExcluded(candidate) && candidate.length > 3) {
+              logDebug('Found name after keyword: "' + candidate + '"');
               return candidate;
             }
           }
         }
         
-        const words = line.split(/\s+/).filter(w => w.length > 1);
-        if (words.length >= 2 && words.length <= 4) {
-          const allExcluded = words.every(w => excludedWords.includes(w.toLowerCase()));
-          if (!allExcluded) {
-            const hasAlpha = words.some(w => /[A-Za-z\u0900-\u097F]/.test(w));
-            if (hasAlpha && !hasDigits) {
-              console.log('Found name as word sequence:', line);
-              return line;
+        if (nameKeywordIndex + 1 < lines.length) {
+          const nextLine = lines[nameKeywordIndex + 1];
+          const candidate = cleanLine(nextLine);
+          logDebug('Next line after keyword: "' + candidate + '"');
+          
+          if (!isExcluded(candidate) && candidate.length > 3) {
+            const words = candidate.split(/\s+/).filter(w => w.length > 1);
+            if (words.length >= 2 && words.length <= 4) {
+              logDebug('Found name on next line: "' + candidate + '"');
+              return candidate;
             }
           }
         }
       }
 
-      for (let i = 0; i < lines.length; i++) {
-        let line = lines[i].trim();
-        const lineLower = line.toLowerCase();
+      logDebug('');
+      logDebug('=== Searching between govt/uidai and dob/gender ===');
+      
+      const startSearch = Math.max(uidaiIndex, govtIndex, -1) + 1;
+      const endSearch = Math.min(
+        dobIndex !== -1 ? dobIndex : lines.length,
+        genderIndex !== -1 ? genderIndex : lines.length
+      );
+      
+      logDebug('Searching lines ' + startSearch + ' to ' + (endSearch - 1));
+
+      for (let i = startSearch; i < endSearch && i < lines.length; i++) {
+        const line = lines[i];
+        logDebug('Checking line ' + i + ': "' + line + '"');
         
-        if (excludedWords.some(w => lineLower.includes(w))) continue;
-        if (/^\d+$/.test(line)) continue;
-        if (line.length < 5) continue;
-        
-        const words = line.split(/\s+/).filter(w => w.length > 1);
-        if (words.length >= 2 && words.length <= 4) {
-          const hasAlpha = /[A-Za-z\u0900-\u097F]/.test(line);
-          const hasDigits = /\d/.test(line);
-          
-          if (hasAlpha && !hasDigits) {
-            console.log('Found name in fallback search:', line);
-            return line;
-          }
+        if (isPossibleName(line)) {
+          const candidate = cleanLine(line);
+          logDebug('Possible name found: "' + candidate + '"');
+          return candidate;
         }
       }
+
+      logDebug('');
+      logDebug('=== Fallback: searching all lines ===');
       
-      console.log('No name found in OCR text');
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        
+        if (isPossibleName(line)) {
+          const candidate = cleanLine(line);
+          logDebug('Fallback name found: "' + candidate + '"');
+          return candidate;
+        }
+      }
+
+      logDebug('No name found in OCR text');
       return null;
     }
 
@@ -553,24 +572,38 @@
       ocrStatus.style.display = 'block';
       ocrStatus.textContent = 'Processing OCR...';
       
+      if (debugInfo) {
+        debugInfo.innerHTML = '';
+      }
+      
       try {
+        logDebug('=== OCR Started ===');
+        
         const worker = await Tesseract.createWorker('eng');
         const ret = await worker.recognize(imageData);
         
         const text = ret.data.text;
-        console.log('OCR Text:', text);
+        logDebug('');
+        logDebug('=== Full OCR Text ===');
+        logDebug(text);
+        logDebug('');
         
         const aadhaarRegex = /\d{4}\s*\d{4}\s*\d{4}/;
         const aadhaarMatch = text.match(aadhaarRegex);
         
         if (aadhaarMatch) {
+          logDebug('Aadhaar number found: ' + aadhaarMatch[0]);
           fullAadhaarNumber = aadhaarMatch[0].replace(/\s/g, '');
           const lastFour = fullAadhaarNumber.slice(-4);
           document.getElementById('aadhaarNumber').value = lastFour;
+          logDebug('Last 4 digits: ' + lastFour);
+        } else {
+          logDebug('No Aadhaar number found');
         }
         
         const extractedName = extractNameFromText(text);
-        console.log('Extracted Name:', extractedName);
+        logDebug('');
+        logDebug('=== Final Extracted Name: ' + (extractedName || 'null') + ' ===');
         
         if (extractedName && !document.getElementById('name').value) {
           document.getElementById('name').value = extractedName;
@@ -579,23 +612,27 @@
         await worker.terminate();
         
         if (extractedName || aadhaarMatch) {
-          ocrStatus.textContent = 'OCR Complete! Name and Aadhaar extracted.';
+          ocrStatus.textContent = 'OCR Complete!';
           setTimeout(() => {
             ocrStatus.style.display = 'none';
             showForm();
           }, 1500);
         } else {
-          ocrStatus.textContent = 'OCR Complete. Some fields may need manual entry.';
+          ocrStatus.textContent = 'OCR Complete. Please enter details manually.';
           setTimeout(() => {
             ocrStatus.style.display = 'none';
+            showForm();
           }, 2000);
         }
         
       } catch (error) {
+        logDebug('OCR Error: ' + error.message);
+        logDebug('Stack: ' + error.stack);
         console.error('OCR Error:', error);
         ocrStatus.textContent = 'OCR failed - you can enter details manually';
         setTimeout(() => {
           ocrStatus.style.display = 'none';
+          showForm();
         }, 3000);
       }
     }
@@ -657,6 +694,12 @@
           }
         }
 
+        logDebug('=== Submitting vendor entry ===');
+        logDebug('Name: ' + document.getElementById('name').value);
+        logDebug('Mobile: ' + document.getElementById('mobile').value);
+        logDebug('Company: ' + document.getElementById('companyName').value);
+        logDebug('Aadhaar: ' + storedAadhaar);
+
         await API.createVendorEntry({
           name: document.getElementById('name').value,
           mobile: document.getElementById('mobile').value,
@@ -679,6 +722,7 @@
           window.location.href = 'dashboard.html';
         }, 2000);
       } catch (error) {
+        logDebug('Submit Error: ' + error.message);
         errorMsg.textContent = error.message || 'Failed to create entry';
         errorMsg.style.display = 'block';
       }
