@@ -125,7 +125,6 @@
     .vendor { background: #fefcbf; color: #b7791f; }
     .vehicle { background: #c6f6d5; color: #276749; }
     .users { background: #e9d8fd; color: #6b46c1; }
-    .list { background: #fed7e2; color: #b83280; }
   </style>
 </head>
 <body>
@@ -143,57 +142,51 @@
       <p>Select a module to get started</p>
     </div>
 
-     <div class="cards">
-       <a href="material-inward-list.html" class="card" id="inwardCard">
-         <div class="card-header">
-           <div class="icon inward">📥</div>
-           <span class="card-badge"><span>➕</span> New Entry</span>
-         </div>
-         <h3>Material Inward</h3>
-         <p>View and manage incoming material entries with DC details</p>
-       </a>
+    <div class="cards">
+      <a href="material-inward-list.html" class="card" id="inwardCard">
+        <div class="card-header">
+          <div class="icon inward">📥</div>
+          <span class="card-badge"><span>➕</span> New Entry</span>
+        </div>
+        <h3>Material Inward</h3>
+        <p>View and manage incoming material entries with DC details</p>
+      </a>
 
-       <a href="material-outward-list.html" class="card" id="outwardCard">
-         <div class="card-header">
-           <div class="icon outward">📤</div>
-           <span class="card-badge"><span>➕</span> New Entry</span>
-         </div>
-         <h3>Material Outward</h3>
-         <p>View and manage outgoing material entries with DC details</p>
-       </a>
+      <a href="material-outward-list.html" class="card" id="outwardCard">
+        <div class="card-header">
+          <div class="icon outward">📤</div>
+          <span class="card-badge"><span>➕</span> New Entry</span>
+        </div>
+        <h3>Material Outward</h3>
+        <p>View and manage outgoing material entries with DC details</p>
+      </a>
 
-       <a href="vendor-entry.html" class="card" id="vendorEntryCard">
-         <div class="card-header">
-           <div class="icon vendor">👤</div>
-         </div>
-         <h3>Vendor Entry</h3>
-         <p>Register visitors with Aadhaar card OCR verification</p>
-       </a>
+      <a href="vendor-list.html" class="card" id="vendorEntryCard">
+        <div class="card-header">
+          <div class="icon vendor">👤</div>
+          <span class="card-badge"><span>➕</span> New Entry</span>
+        </div>
+        <h3>Vendor Entry</h3>
+        <p>View and manage vendor entries with Aadhaar verification</p>
+      </a>
 
-       <a href="vehicle-entry.html" class="card" id="vehicleEntryCard">
-         <div class="card-header">
-           <div class="icon vehicle">🚗</div>
-         </div>
-         <h3>Vehicle Entry</h3>
-         <p>Register vehicles entering the premises</p>
-       </a>
+      <a href="vendor-list.html#vehicle" class="card" id="vehicleEntryCard">
+        <div class="card-header">
+          <div class="icon vehicle">🚗</div>
+          <span class="card-badge"><span>➕</span> New Entry</span>
+        </div>
+        <h3>Vehicle Entry</h3>
+        <p>View and manage vehicle entries entering the premises</p>
+      </a>
 
-       <a href="vendor-list.html" class="card">
-         <div class="card-header">
-           <div class="icon list">📋</div>
-         </div>
-         <h3>Vendor/Vehicle List</h3>
-         <p>View and manage active entries with exit tracking</p>
-       </a>
-
-       <a href="user-management.html" class="card" id="usersCard">
-         <div class="card-header">
-           <div class="icon users">👥</div>
-         </div>
-         <h3>User Management</h3>
-         <p>Admin only - Manage gate users and permissions</p>
-       </a>
-     </div>
+      <a href="user-management.html" class="card" id="usersCard">
+        <div class="card-header">
+          <div class="icon users">👥</div>
+        </div>
+        <h3>User Management</h3>
+        <p>Admin only - Manage gate users and permissions</p>
+      </a>
+    </div>
   </div>
 
   <script src="./js/api.js"></script>
