@@ -38,7 +38,7 @@
       text-decoration: none;
     }
     .container {
-      max-width: 600px;
+      max-width: 900px;
       margin: 32px auto;
       padding: 0 16px;
     }
@@ -50,16 +50,63 @@
     }
     .form-container h2 {
       color: #1a1a1a;
+      margin-bottom: 8px;
+      font-size: 24px;
+    }
+    .form-subtitle {
+      color: #718096;
+      font-size: 14px;
       margin-bottom: 24px;
     }
-    .form-group {
+    .section-card {
+      background: #f7fafc;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .section-title {
+      color: #4a5568;
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
       margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title .icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    @media (min-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .form-group.full-width {
+      grid-column: 1 / -1;
     }
     label {
       display: block;
       margin-bottom: 8px;
       color: #4a5568;
       font-weight: 500;
+      font-size: 14px;
     }
     label .required {
       color: #e53e3e;
@@ -71,19 +118,31 @@
       border: 2px solid #e2e8f0;
       border-radius: 8px;
       font-size: 16px;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: white;
     }
     input:focus, select:focus, textarea:focus {
       outline: none;
       border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    input:disabled, select:disabled {
+      background: #edf2f7;
+      cursor: not-allowed;
     }
     textarea {
       resize: vertical;
-      min-height: 80px;
+      min-height: 100px;
     }
-    button {
-      width: 100%;
-      padding: 14px;
+    .submit-section {
+      margin-top: 32px;
+      display: flex;
+      justify-content: flex-end;
+    }
+    button[type="submit"] {
+      width: auto;
+      min-width: 200px;
+      padding: 14px 32px;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       border: none;
@@ -91,55 +150,93 @@
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
-      transition: transform 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
-    button:hover {
+    button[type="submit"]:hover {
       transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
     .success {
       background: #c6f6d5;
       color: #276749;
-      padding: 12px;
+      padding: 16px;
       border-radius: 8px;
       margin-bottom: 20px;
       display: none;
+      font-weight: 500;
     }
     .error {
       background: #fed7d7;
       color: #c53030;
-      padding: 12px;
+      padding: 16px;
       border-radius: 8px;
       margin-bottom: 20px;
       display: none;
+      font-weight: 500;
     }
     .file-upload {
-      border: 2px dashed #e2e8f0;
+      border: 2px dashed #cbd5e0;
       border-radius: 8px;
-      padding: 24px;
+      padding: 32px;
       text-align: center;
       cursor: pointer;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, background 0.2s;
+      background: white;
     }
     .file-upload:hover {
       border-color: #667eea;
+      background: #f0f4ff;
+    }
+    .file-upload .upload-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+    .file-upload .upload-text {
+      color: #4a5568;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .file-upload .upload-hint {
+      color: #718096;
+      font-size: 12px;
     }
     .file-upload input {
       display: none;
     }
-    .section-divider {
-      border-top: 1px solid #e2e8f0;
-      margin: 24px 0;
+    .file-selected {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #ebf8ff;
+      border-radius: 8px;
+      margin-top: 12px;
+    }
+    .file-selected .file-icon {
+      font-size: 20px;
+    }
+    .file-selected .file-name {
+      color: #2b6cb0;
+      font-weight: 500;
+      font-size: 14px;
     }
     .hidden-field {
       display: none;
     }
     .gate-info {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       background: #ebf8ff;
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 20px;
+      padding: 8px 16px;
+      border-radius: 20px;
       color: #2b6cb0;
       font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 24px;
+    }
+    .gate-info .icon {
+      font-size: 16px;
     }
   </style>
 </head>
@@ -152,128 +249,156 @@
   <div class="container">
     <div class="form-container">
       <h2>Register Inward Material</h2>
-      <div class="success" id="successMsg">Entry created successfully!</div>
+      <p class="form-subtitle">Fill in the details below to register an incoming material entry</p>
+      
+      <div class="success" id="successMsg">Entry created successfully! Redirecting to dashboard...</div>
       <div class="error" id="errorMsg"></div>
       
       <div class="gate-info" id="gateInfo">
+        <span class="icon">🚪</span>
         Entry Gate: <span id="currentGate">-</span>
       </div>
 
       <form id="inwardForm">
-        <div class="form-group">
-          <label for="prPoNumber">PR/PO Number</label>
-          <input type="text" id="prPoNumber" placeholder="Enter PR/PO number">
-        </div>
-
-        <div class="form-group">
-          <label for="assetBelongsTo">Asset Belongs To<span class="required">*</span></label>
-          <select id="assetBelongsTo" required>
-            <option value="">Select asset belongs to</option>
-            <option value="CtrlS">CtrlS</option>
-            <option value="Customer">Customer</option>
-            <option value="Project">Project</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="typeOfInward">Type of Inward<span class="required">*</span></label>
-          <select id="typeOfInward" required>
-            <option value="">Select type of inward</option>
-            <option value="Inward Non Returnable">Inward Non Returnable</option>
-            <option value="Inward Returnable">Inward Returnable</option>
-            <option value="Internal Movement Inward">Internal Movement Inward</option>
-          </select>
-        </div>
-
-        <div class="form-group hidden-field" id="customerNameGroup">
-          <label for="customerName">Customer Name<span class="required">*</span></label>
-          <select id="customerName">
-            <option value="">Select customer</option>
-          </select>
-        </div>
-
-        <div class="section-divider"></div>
-
-        <div class="form-group">
-          <label for="requesterName">Requester Name<span class="required">*</span></label>
-          <input type="text" id="requesterName" placeholder="Enter requester name" required>
-        </div>
-
-        <div class="form-group">
-          <label for="requesterEmail">Requester Email<span class="required">*</span></label>
-          <input type="email" id="requesterEmail" placeholder="Enter requester email" required>
-        </div>
-
-        <div class="form-group">
-          <label for="departmentName">Department Name</label>
-          <input type="text" id="departmentName" placeholder="Enter department name">
-        </div>
-
-        <div class="form-group">
-          <label for="shipmentNumber">Shipment Number</label>
-          <input type="text" id="shipmentNumber" placeholder="Enter shipment number">
-        </div>
-
-        <div class="section-divider"></div>
-
-        <div class="form-group">
-          <label for="vehicleNumber">Vehicle Number<span class="required">*</span></label>
-          <input type="text" id="vehicleNumber" placeholder="Enter vehicle number" required>
-        </div>
-
-        <div class="form-group">
-          <label for="vendorName">Vendor Name<span class="required">*</span></label>
-          <select id="vendorName" required>
-            <option value="">Select vendor</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="invoiceDcNumber">Invoice / DC Number<span class="required">*</span></label>
-          <input type="text" id="invoiceDcNumber" placeholder="Enter invoice/DC number" required>
-        </div>
-
-        <div class="form-group">
-          <label for="invoiceValue">Invoice Value (₹)<span class="required">*</span></label>
-          <input type="number" id="invoiceValue" placeholder="Enter invoice value" step="0.01" min="0" required>
-        </div>
-
-        <div class="form-group">
-          <label for="itemsQty">Items Qty<span class="required">*</span></label>
-          <input type="number" id="itemsQty" placeholder="Enter quantity" min="1" required>
-        </div>
-
-        <div class="form-group">
-          <label for="materialDescription">Material Description<span class="required">*</span></label>
-          <select id="materialDescription" required>
-            <option value="">Select material description</option>
-            <option value="As per attached DC">As per attached DC</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="entrySerialNumber">Entry Serial Number<span class="required">*</span></label>
-          <input type="text" id="entrySerialNumber" placeholder="Enter entry serial number" required>
-        </div>
-
-        <div class="form-group">
-          <label for="remarks">Remarks</label>
-          <textarea id="remarks" placeholder="Enter remarks"></textarea>
-        </div>
-
-        <div class="section-divider"></div>
-
-        <div class="form-group">
-          <label>Document (PDF only, max 10MB)</label>
-          <div class="file-upload" id="fileUpload">
-            <p>Click to upload or drag and drop</p>
-            <p style="color: #718096; font-size: 12px; margin-top: 8px;">PDF only, 10MB max</p>
-            <input type="file" id="document" accept=".pdf">
+        <div class="section-card">
+          <div class="section-title">
+            <span class="icon" style="background: #e9d8fd; color: #6b46c1;">📋</span>
+            Basic Details
           </div>
-          <p id="fileName" style="margin-top: 8px; color: #4a5568;"></p>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="prPoNumber">PR/PO Number</label>
+              <input type="text" id="prPoNumber" placeholder="Enter PR/PO number">
+            </div>
+            <div class="form-group">
+              <label for="assetBelongsTo">Asset Belongs To<span class="required">*</span></label>
+              <select id="assetBelongsTo" required>
+                <option value="">Select asset belongs to</option>
+                <option value="CtrlS">CtrlS</option>
+                <option value="Customer">Customer</option>
+                <option value="Project">Project</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="typeOfInward">Type of Inward<span class="required">*</span></label>
+              <select id="typeOfInward" required>
+                <option value="">Select type of inward</option>
+                <option value="Inward Non Returnable">Inward Non Returnable</option>
+                <option value="Inward Returnable">Inward Returnable</option>
+                <option value="Internal Movement Inward">Internal Movement Inward</option>
+              </select>
+            </div>
+            <div class="form-group hidden-field" id="customerNameGroup">
+              <label for="customerName">Customer Name<span class="required">*</span></label>
+              <select id="customerName">
+                <option value="">Select customer</option>
+              </select>
+            </div>
+          </div>
         </div>
 
-        <button type="submit">Submit Entry</button>
+        <div class="section-card">
+          <div class="section-title">
+            <span class="icon" style="background: #c6f6d5; color: #276749;">👤</span>
+            Requester & Shipment
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="requesterName">Requester Name<span class="required">*</span></label>
+              <input type="text" id="requesterName" placeholder="Enter requester name" required>
+            </div>
+            <div class="form-group">
+              <label for="requesterEmail">Requester Email<span class="required">*</span></label>
+              <input type="email" id="requesterEmail" placeholder="Enter requester email" required>
+            </div>
+            <div class="form-group">
+              <label for="departmentName">Department Name</label>
+              <input type="text" id="departmentName" placeholder="Enter department name">
+            </div>
+            <div class="form-group">
+              <label for="shipmentNumber">Shipment Number</label>
+              <input type="text" id="shipmentNumber" placeholder="Enter shipment number">
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-title">
+            <span class="icon" style="background: #fefcbf; color: #b7791f;">📦</span>
+            Material & Vendor Details
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="vehicleNumber">Vehicle Number<span class="required">*</span></label>
+              <input type="text" id="vehicleNumber" placeholder="Enter vehicle number" required>
+            </div>
+            <div class="form-group">
+              <label for="vendorName">Vendor Name<span class="required">*</span></label>
+              <select id="vendorName" required>
+                <option value="">Select vendor</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="invoiceDcNumber">Invoice / DC Number<span class="required">*</span></label>
+              <input type="text" id="invoiceDcNumber" placeholder="Enter invoice/DC number" required>
+            </div>
+            <div class="form-group">
+              <label for="invoiceValue">Invoice Value (₹)<span class="required">*</span></label>
+              <input type="number" id="invoiceValue" placeholder="Enter invoice value" step="0.01" min="0" required>
+            </div>
+            <div class="form-group">
+              <label for="itemsQty">Items Qty<span class="required">*</span></label>
+              <input type="number" id="itemsQty" placeholder="Enter quantity" min="1" required>
+            </div>
+            <div class="form-group">
+              <label for="materialDescription">Material Description<span class="required">*</span></label>
+              <select id="materialDescription" required>
+                <option value="">Select material description</option>
+                <option value="As per attached DC">As per attached DC</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-title">
+            <span class="icon" style="background: #fed7d7; color: #c53030;">📄</span>
+            Additional Details
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="entrySerialNumber">Entry Serial Number<span class="required">*</span></label>
+              <input type="text" id="entrySerialNumber" placeholder="Enter entry serial number" required>
+            </div>
+            <div class="form-group full-width">
+              <label for="remarks">Remarks</label>
+              <textarea id="remarks" placeholder="Enter any additional remarks or notes"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-title">
+            <span class="icon" style="background: #bee3f8; color: #2b6cb0;">📎</span>
+            Document Upload
+          </div>
+          <div class="form-group full-width">
+            <div class="file-upload" id="fileUpload">
+              <input type="file" id="document" accept=".pdf">
+              <div class="upload-icon">📁</div>
+              <div class="upload-text">Click to upload or drag and drop</div>
+              <div class="upload-hint">PDF only, max 10MB</div>
+            </div>
+            <div id="fileSelectedDisplay" class="file-selected" style="display: none;">
+              <span class="file-icon">📄</span>
+              <span class="file-name" id="fileName"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="submit-section">
+          <button type="submit">Submit Entry</button>
+        </div>
       </form>
     </div>
   </div>
@@ -291,6 +416,7 @@
     const fileUpload = document.getElementById('fileUpload');
     const fileInput = document.getElementById('document');
     const fileName = document.getElementById('fileName');
+    const fileSelectedDisplay = document.getElementById('fileSelectedDisplay');
     const assetBelongsTo = document.getElementById('assetBelongsTo');
     const typeOfInward = document.getElementById('typeOfInward');
     const customerNameGroup = document.getElementById('customerNameGroup');
@@ -299,22 +425,48 @@
 
     fileUpload.addEventListener('click', () => fileInput.click());
 
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length > 0) {
-        const file = e.target.files[0];
-        if (file.type !== 'application/pdf') {
-          alert('Only PDF files are allowed');
-          fileInput.value = '';
-          return;
-        }
-        if (file.size > 10 * 1024 * 1024) {
-          alert('File size must be less than 10MB');
-          fileInput.value = '';
-          return;
-        }
-        fileName.textContent = file.name;
+    fileUpload.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      fileUpload.style.borderColor = '#667eea';
+      fileUpload.style.background = '#f0f4ff';
+    });
+
+    fileUpload.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      fileUpload.style.borderColor = '#cbd5e0';
+      fileUpload.style.background = 'white';
+    });
+
+    fileUpload.addEventListener('drop', (e) => {
+      e.preventDefault();
+      fileUpload.style.borderColor = '#cbd5e0';
+      fileUpload.style.background = 'white';
+      
+      if (e.dataTransfer.files.length > 0) {
+        handleFile(e.dataTransfer.files[0]);
       }
     });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    function handleFile(file) {
+      if (file.type !== 'application/pdf') {
+        alert('Only PDF files are allowed');
+        fileInput.value = '';
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File size must be less than 10MB');
+        fileInput.value = '';
+        return;
+      }
+      fileName.textContent = file.name;
+      fileSelectedDisplay.style.display = 'flex';
+    }
 
     assetBelongsTo.addEventListener('change', (e) => {
       const value = e.target.value;
@@ -414,7 +566,7 @@
 
         successMsg.style.display = 'block';
         e.target.reset();
-        fileName.textContent = '';
+        fileSelectedDisplay.style.display = 'none';
         customerNameGroup.classList.add('hidden-field');
         typeOfInward.disabled = false;
         
