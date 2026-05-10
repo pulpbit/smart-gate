@@ -1,779 +1,872 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vendor Entry - Smart Gate Security</title>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background-color: #f7fafc;
-      min-height: 100vh;
-    }
-    .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 16px 32px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .header h1 {
-      font-size: 20px;
-      font-weight: 600;
-    }
-    .back-btn {
-      background: rgba(255,255,255,0.2);
-      border: none;
-      color: white;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      text-decoration: none;
-    }
-    .container {
-      max-width: 600px;
-      margin: 32px auto;
-      padding: 0 16px;
-    }
-    .form-container {
-      background: white;
-      border-radius: 12px;
-      padding: 32px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    .form-container h2 {
-      color: #1a1a1a;
-      margin-bottom: 24px;
-    }
-    .form-group {
-      margin-bottom: 20px;
-    }
-    label {
-      display: block;
-      margin-bottom: 8px;
-      color: #4a5568;
-      font-weight: 500;
-    }
-    input {
-      width: 100%;
-      padding: 12px 16px;
-      border: 2px solid #e2e8f0;
-      border-radius: 8px;
-      font-size: 16px;
-      transition: border-color 0.2s;
-    }
-    input:focus {
-      outline: none;
-      border-color: #667eea;
-    }
-    button {
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    button:hover {
-      transform: translateY(-2px);
-    }
-    .success {
-      background: #c6f6d5;
-      color: #276749;
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      display: none;
-    }
-    .error {
-      background: #fed7d7;
-      color: #c53030;
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      display: none;
-    }
-    .camera-section {
-      margin-top: 24px;
-    }
-    .camera-container {
-      position: relative;
-      width: 100%;
-      max-width: 400px;
-      margin: 0 auto 16px;
-      aspect-ratio: 16 / 9;
-      overflow: hidden;
-      border-radius: 8px;
-      background: #000;
-    }
-    #cameraVideo {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    #capturedCanvas {
-      display: none;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .camera-controls {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 16px;
-      justify-content: center;
-    }
-    .camera-controls button {
-      width: auto;
-      padding: 12px 32px;
-      font-size: 16px;
-    }
-    .camera-controls .secondary-btn {
-      background: linear-gradient(135deg, #718096 0%, #4a5568 100%);
-    }
-    .ocr-status {
-      text-align: center;
-      padding: 12px;
-      background: #ebf8ff;
-      color: #2b6cb0;
-      border-radius: 8px;
-      display: none;
-    }
-    .aadhaar-preview {
-      display: flex;
-      gap: 16px;
-      margin-top: 16px;
-      justify-content: center;
-    }
-    .aadhaar-preview img {
-      width: 120px;
-      height: 75px;
-      object-fit: cover;
-      border: 2px solid #e2e8f0;
-      border-radius: 4px;
-    }
-    .section-title {
-      color: #4a5568;
-      font-weight: 600;
-      margin-bottom: 12px;
-      font-size: 14px;
-    }
-    .scan-instructions {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #4a5568;
-    }
-    .scan-instructions h3 {
-      margin-bottom: 8px;
-      color: #1a1a1a;
-    }
-    #vendorForm {
-      display: none;
-    }
-    .debug-info {
-      background: #f7fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 12px;
-      margin-top: 16px;
-      font-family: monospace;
-      font-size: 12px;
-      max-height: 400px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Vendor Entry - Smart Gate Security</title>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f7fafc;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 32px auto;
+            padding: 0 16px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+        }
+
+        .card h2 {
+            color: #1a1a1a;
+            margin-bottom: 16px;
+            font-size: 18px;
+        }
+
+        .subhead {
+            color: #4a5568;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .media-zone {
+            background: #000000aa;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            position: relative;
+            aspect-ratio: 4 / 3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #667eea55;
+        }
+
+        video, #imagePreview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #imagePreview {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f7fafc;
+            color: #718096;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 15px 0 10px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+            background: #edf2f7;
+            color: #1a1a1a;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+        }
+
+        .status-badge {
+            background: #ebf8ff;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 14px;
+            text-align: center;
+            color: #2b6cb0;
+            margin-top: 10px;
+        }
+
+        .form-section {
+            margin-top: 12px;
+        }
+
+        .form-row {
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-row label {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        .form-row input {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #1a1a1a;
+            font-size: 16px;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .form-row input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+
+        .form-row input::placeholder {
+            color: #a0aec0;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 14px;
+            font-size: 16px;
+            margin-top: 8px;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .inline-badge {
+            background: #fefcbf;
+            color: #b7791f;
+            border-radius: 12px;
+            padding: 2px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .required-star {
+            color: #e53e3e;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loader {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+        }
+
+        .clean-note {
+            font-size: 12px;
+            color: #38a169;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        #entryFormCard {
+            display: none;
+        }
+
+        .success-msg {
+            background: #c6f6d5;
+            color: #276749;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .error-msg {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .debug-info {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 16px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            display: none;
+        }
+    </style>
 </head>
 <body>
-  <div class="header">
-    <h1>Vendor Entry</h1>
-    <a href="dashboard.html" class="back-btn">Back to Dashboard</a>
-  </div>
-
-  <div class="container">
-    <div class="form-container">
-      <div class="success" id="successMsg">Entry created successfully!</div>
-      <div class="error" id="errorMsg"></div>
-      
-      <div id="cameraSection">
-        <div class="scan-instructions">
-          <h3>Scan Aadhaar Card</h3>
-          <p>Position the front of the Aadhaar card within the frame and click Capture</p>
-        </div>
-        
-        <div class="camera-controls">
-          <button type="button" id="startCameraBtn">Start Camera</button>
-        </div>
-
-        <div class="camera-container">
-          <video id="cameraVideo" autoplay playsinline></video>
-          <canvas id="capturedCanvas"></canvas>
-        </div>
-
-        <div class="camera-controls" id="captureControls" style="display: none;">
-          <button type="button" id="captureBtn">Capture</button>
-          <button type="button" id="stopCameraBtn" class="secondary-btn">Stop</button>
-        </div>
-
-        <div class="camera-controls" id="retakeControls" style="display: none;">
-          <button type="button" id="retakeBtn">Retake</button>
-          <button type="button" id="stopCameraBtn2" class="secondary-btn">Stop</button>
-        </div>
-
-        <div class="ocr-status" id="ocrStatus">Processing OCR...</div>
-
-        <div class="aadhaar-preview" id="aadhaarPreview" style="display: none;">
-          <div>
-            <p style="font-size: 12px; margin-bottom: 4px; color: #4a5568; text-align: center;">Captured Image</p>
-            <img id="capturedPreview">
-          </div>
-        </div>
-
-        <div class="debug-info" id="debugInfo"></div>
-
-        <div style="margin-top: 20px; text-align: center;">
-          <button type="button" id="skipScanBtn" class="secondary-btn" style="width: auto; padding: 10px 24px;">Skip Scan & Enter Manually</button>
-        </div>
-      </div>
-      
-      <form id="vendorForm">
-        <h2>Register Vendor Entry</h2>
-        
-        <div class="form-group">
-          <label for="name">Name *</label>
-          <input type="text" id="name" placeholder="Enter vendor name" required>
-        </div>
-
-        <div class="form-group">
-          <label for="mobile">Mobile Number *</label>
-          <input type="tel" id="mobile" placeholder="Enter mobile number" required>
-        </div>
-
-        <div class="form-group">
-          <label for="companyName">Company Name</label>
-          <input type="text" id="companyName" placeholder="Enter company name">
-        </div>
-
-        <div class="form-group">
-          <label for="aadhaarNumber">Aadhaar Number (Last 4 digits)</label>
-          <input type="text" id="aadhaarNumber" placeholder="XXXX" maxlength="4">
-        </div>
-
-        <button type="submit" style="margin-top: 24px;">Submit Entry</button>
-      </form>
+    <div class="header">
+        <h1>Vendor Entry</h1>
+        <a href="dashboard.html" class="back-btn">Back to Dashboard</a>
     </div>
-  </div>
 
-  <script src="./js/api.js"></script>
-  <script>
-    const token = localStorage.getItem('token');
-    if (!token) {
-      window.location.href = 'index.html';
-    }
+    <div class="container">
+        <!-- SCANNER CARD -->
+        <div class="card" id="scannerCard">
+            <h2>Scan Aadhaar Card</h2>
+            <p class="subhead">Capture Aadhaar card → Click SCAN to extract Name + Last 4 digits</p>
 
-    let mediaStream = null;
-    let aadhaarFrontBase64 = null;
-    let fullAadhaarNumber = '';
+            <!-- Media Preview -->
+            <div class="media-zone">
+                <video id="video" autoplay playsinline muted style="display: none;"></video>
+                <canvas id="canvasCapture" style="display: none;"></canvas>
+                <div id="imagePreview">
+                    📷 No image<br><span style="font-size:12px;">Open Camera or Upload</span>
+                </div>
+            </div>
 
-    const video = document.getElementById('cameraVideo');
-    const canvas = document.getElementById('capturedCanvas');
-    const startCameraBtn = document.getElementById('startCameraBtn');
-    const captureBtn = document.getElementById('captureBtn');
-    const retakeBtn = document.getElementById('retakeBtn');
-    const stopCameraBtn = document.getElementById('stopCameraBtn');
-    const stopCameraBtn2 = document.getElementById('stopCameraBtn2');
-    const captureControls = document.getElementById('captureControls');
-    const retakeControls = document.getElementById('retakeControls');
-    const ocrStatus = document.getElementById('ocrStatus');
-    const cameraSection = document.getElementById('cameraSection');
-    const vendorForm = document.getElementById('vendorForm');
-    const debugInfo = document.getElementById('debugInfo');
+            <!-- Control Buttons -->
+            <div class="button-group">
+                <button id="openCameraBtn" class="btn">📷 Open Camera</button>
+                <button id="captureBtn" class="btn btn-primary" disabled>📸 Capture Frame</button>
+                <label for="fileUpload" class="btn" style="cursor:pointer;">📁 Upload Image</label>
+                <input type="file" id="fileUpload" accept="image/jpeg,image/png,image/jpg" style="display: none;">
+            </div>
+            <div class="button-group">
+                <button id="startOcrBtn" class="btn btn-success" disabled>🔍 SCAN & EXTRACT (Name + Aadhaar)</button>
+            </div>
+            <div id="ocrStatus" class="status-badge">⚙️ Ready. Capture/Upload image, then click SCAN.</div>
+            
+            <div class="debug-info" id="debugInfo"></div>
+        </div>
 
-    const DEBUG_MODE = true;
+        <!-- ENTRY FORM CARD (initially hidden until first scan success) -->
+        <div class="card" id="entryFormCard">
+            <div class="success-msg" id="successMsg">Entry created successfully!</div>
+            <div class="error-msg" id="errorMsg"></div>
+            
+            <h2>Register Vendor Entry</h2>
+            <p class="subhead">Review & complete details — Name is auto-cleaned</p>
 
-    function logDebug(message) {
-      console.log(message);
-      if (DEBUG_MODE && debugInfo) {
-        debugInfo.innerHTML += message + '\n';
-      }
-    }
+            <div class="form-section">
+                <div class="form-row">
+                    <label>👤 Full Name <span class="inline-badge">From OCR (auto-cleaned)</span></label>
+                    <input type="text" id="formName" placeholder="Extracted name will appear here">
+                    <div class="clean-note" id="cleanNote">✨ Stray characters removed automatically</div>
+                </div>
+                <div class="form-row">
+                    <label>📱 Mobile Number <span class="required-star">*</span></label>
+                    <input type="tel" id="formMobile" placeholder="Enter 10-digit mobile number" maxlength="10">
+                </div>
+                <div class="form-row">
+                    <label>🆔 Aadhaar Last 4 Digits <span class="inline-badge">From OCR</span></label>
+                    <input type="text" id="formAadhaarLast4" placeholder="XXXX" maxlength="4">
+                </div>
+                <div class="form-row">
+                    <label>🏢 Company Name</label>
+                    <input type="text" id="formCompany" placeholder="Company / Organization name">
+                </div>
+                <button id="submitEntryBtn" class="submit-btn">✅ SUBMIT ENTRY</button>
+            </div>
+        </div>
+    </div>
 
-    document.getElementById('aadhaarNumber').addEventListener('input', (e) => {
-      let value = e.target.value.replace(/\D/g, '');
-      if (value.length > 4) value = value.slice(0, 4);
-      e.target.value = value;
-    });
-
-    async function startCamera() {
-      try {
-        if (mediaStream) {
-          mediaStream.getTracks().forEach(track => track.stop());
-        }
+    <script src="./js/api.js"></script>
+    <script>
+        // ------------------- DOM Elements -------------------
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvasCapture');
+        const imagePreviewDiv = document.getElementById('imagePreview');
+        const openCameraBtn = document.getElementById('openCameraBtn');
+        const captureBtn = document.getElementById('captureBtn');
+        const fileUpload = document.getElementById('fileUpload');
+        const startOcrBtn = document.getElementById('startOcrBtn');
+        const ocrStatusSpan = document.getElementById('ocrStatus');
+        const entryFormCard = document.getElementById('entryFormCard');
+        const scannerCard = document.getElementById('scannerCard');
+        const debugInfo = document.getElementById('debugInfo');
         
-        logDebug('=== Requesting camera access ===');
-        mediaStream = await navigator.mediaDevices.getUserMedia({ 
-          video: { 
-            facingMode: 'environment',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          } 
-        });
-        
-        logDebug('Camera access granted');
-        video.srcObject = mediaStream;
-        
-        startCameraBtn.style.display = 'none';
-        captureControls.style.display = 'flex';
-        
-      } catch (error) {
-        logDebug('Camera error: ' + error.message);
-        alert('Unable to access camera: ' + error.message);
-      }
-    }
+        // Form fields
+        const formName = document.getElementById('formName');
+        const formMobile = document.getElementById('formMobile');
+        const formAadhaarLast4 = document.getElementById('formAadhaarLast4');
+        const formCompany = document.getElementById('formCompany');
+        const submitBtn = document.getElementById('submitEntryBtn');
+        const cleanNote = document.getElementById('cleanNote');
+        const successMsg = document.getElementById('successMsg');
+        const errorMsg = document.getElementById('errorMsg');
 
-    function stopCamera() {
-      if (mediaStream) {
-        mediaStream.getTracks().forEach(track => track.stop());
-        mediaStream = null;
-      }
-      video.srcObject = null;
-      canvas.style.display = 'none';
-      video.style.display = 'block';
-      startCameraBtn.style.display = 'block';
-      captureControls.style.display = 'none';
-      retakeControls.style.display = 'none';
-    }
+        // State variables
+        let currentImageDataURL = null;
+        let streamActive = false;
+        let currentStream = null;
+        let lastExtractedName = "";
+        let lastExtractedLast4 = "";
+        let aadhaarFrontBase64 = null;
 
-    function captureImage() {
-      logDebug('=== Capturing image ===');
-      
-      const videoWidth = video.videoWidth;
-      const videoHeight = video.videoHeight;
-      
-      logDebug('Video dimensions: ' + videoWidth + 'x' + videoHeight);
-      
-      canvas.width = videoWidth;
-      canvas.height = videoHeight;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0);
-      
-      video.style.display = 'none';
-      canvas.style.display = 'block';
-      captureControls.style.display = 'none';
-      retakeControls.style.display = 'flex';
-      
-      const imageData = canvas.toDataURL('image/jpeg', 0.9);
-      logDebug('Image captured (base64 length: ' + imageData.length + ')');
-      
-      return imageData;
-    }
+        const DEBUG_MODE = true;
 
-    function retake() {
-      canvas.style.display = 'none';
-      video.style.display = 'block';
-      retakeControls.style.display = 'none';
-      captureControls.style.display = 'flex';
-      document.getElementById('aadhaarPreview').style.display = 'none';
-    }
-
-    function showForm() {
-      cameraSection.style.display = 'none';
-      vendorForm.style.display = 'block';
-    }
-
-    function cleanLine(line) {
-      return line.trim()
-        .replace(/[^A-Za-z\u0900-\u097F\s\.\-\']/g, '')
-        .replace(/\s+/g, ' ')
-        .trim();
-    }
-
-    const excludedWords = [
-      'government', 'india', 'aadhaar', 'aadhar', 'adhaar', 'adhar',
-      'unique', 'identification', 'authority', 'uidai', 'govt',
-      'of', 'the', 'to', 'and', 'or', 'by', 'for', 'in', 'on', 'at',
-      'address', 'dob', 'date', 'birth', 'male', 'female', 'transgender',
-      'enrolment', 'enroll', 'vid', 'help', 'www', 'gov', '1947',
-      'care', 'contact', 'toll', 'free', 'issue', 'download', 'mobile',
-      'email', 'web', 'site', 'register', 'national', 'id', 'identity',
-      'card', 'resident', 'citizen', 'portal', 'public', 'private', 'limited',
-      'ltd', 'pvt', 'company', 'services', 'state', 'central', 'ministry',
-      'department', 'office', 'division', 'verify', 'verification', 'kyc',
-      'know', 'your', 'customer', 'client', 'non-resident', 'nri',
-      'oci', 'pio', 'foreigner', 'father', 'mother', 'parent', 'guardian',
-      'spouse', 'wife', 'husband', 'son', 'daughter', 'child', 'relative',
-      'relation', 'street', 'road', 'lane', 'gali', 'mohalla',
-      'colony', 'sector', 'block', 'building', 'floor', 'flat', 'room', 'house',
-      'plot', 'survey', 'village', 'town', 'city', 'district', 'tehsil', 'taluk',
-      'country', 'pin', 'pincode', 'zip', 'code', 'postal', 'gender', 'sex',
-      'भारत', 'सरकार', 'आधार', 'पुरुष', 'महिला', 'जन्म', 'पता',
-      'महानिदेशालय', 'विभाग', 'कार्यालय', 'नाम', 'nama', 'nane', 'nam',
-      'माता', 'पिता', 'पत्नी', 'पति', 'पुत्र', 'पुत्री',
-      's/o', 'd/o', 'w/o', 'h/o', 'c/o', 'son of', 'daughter of', 'wife of',
-      'husband of', 'care of', 'mr', 'mrs', 'ms', 'dr', 'prof', 'shri', 'smt', 'kum',
-      'm/', 'f/', 'm:', 'f:', 'mr.', 'mrs.', 'ms.', 'dr.'
-    ];
-
-    function isExcluded(word) {
-      const lower = word.toLowerCase();
-      return excludedWords.includes(lower);
-    }
-
-    function hasExcludedWord(line) {
-      const lower = line.toLowerCase();
-      for (const word of excludedWords) {
-        if (lower.includes(word)) return true;
-      }
-      return false;
-    }
-
-    function isDigitsOnly(line) {
-      return /^[\d\s]+$/.test(line);
-    }
-
-    function isPossibleName(line) {
-      if (!line || line.length < 3) return false;
-      
-      const cleaned = cleanLine(line);
-      if (!cleaned || cleaned.length < 3) return false;
-      
-      if (hasExcludedWord(cleaned)) return false;
-      if (isDigitsOnly(cleaned)) return false;
-      
-      const words = cleaned.split(/\s+/).filter(w => w.length > 1);
-      
-      if (words.length < 2 || words.length > 4) return false;
-      
-      for (const word of words) {
-        if (isExcluded(word)) return false;
-      }
-      
-      const hasDevanagari = /[\u0900-\u097F]/.test(cleaned);
-      if (hasDevanagari) {
-        return true;
-      }
-      
-      const allCaps = /^[A-Z\s\.]+$/.test(cleaned);
-      const titleCase = /^[A-Z][a-z]+(\s+[A-Z][a-z]+)+$/.test(cleaned);
-      const mixedCase = /^[A-Za-z\s\.]+$/.test(cleaned);
-      
-      if (allCaps || titleCase) {
-        return true;
-      }
-      
-      if (mixedCase && words.length >= 2) {
-        return true;
-      }
-      
-      return false;
-    }
-
-    function extractNameFromText(text) {
-      logDebug('');
-      logDebug('=== Starting Name Extraction ===');
-      logDebug('Raw text length: ' + text.length);
-      
-      const lines = text.split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 2);
-      
-      logDebug('');
-      logDebug('Number of lines: ' + lines.length);
-      lines.forEach((line, i) => {
-        logDebug('Line ' + i + ': "' + line + '"');
-      });
-
-      let nameKeywordIndex = -1;
-      let dobIndex = -1;
-      let genderIndex = -1;
-      let uidaiIndex = -1;
-      let govtIndex = -1;
-      
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].toLowerCase();
-        
-        if (line.includes('name') || line.includes('नाम') || line.includes('nama') || line.includes('nane')) {
-          if (nameKeywordIndex === -1) nameKeywordIndex = i;
-        }
-        
-        if (line.includes('dob') || line.includes('birth') || line.includes('जन्म') || 
-            (line.includes('date') && line.includes('/'))) {
-          if (dobIndex === -1) dobIndex = i;
-        }
-        
-        if (line.includes('male') || line.includes('female') || line.includes('पुरुष') || 
-            line.includes('महिला') || line.includes('transgender')) {
-          if (genderIndex === -1) genderIndex = i;
-        }
-        
-        if (line.includes('uidai') || line.includes('unique') || line.includes('identification')) {
-          if (uidaiIndex === -1) uidaiIndex = i;
-        }
-        
-        if (line.includes('government') || line.includes('भारत') || line.includes('सरकार') ||
-            line.includes('govt') || line.includes('india')) {
-          if (govtIndex === -1) govtIndex = i;
-        }
-      }
-
-      logDebug('');
-      logDebug('Key indices:');
-      logDebug('  nameKeywordIndex: ' + nameKeywordIndex);
-      logDebug('  dobIndex: ' + dobIndex);
-      logDebug('  genderIndex: ' + genderIndex);
-      logDebug('  uidaiIndex: ' + uidaiIndex);
-      logDebug('  govtIndex: ' + govtIndex);
-
-      if (nameKeywordIndex !== -1) {
-        logDebug('');
-        logDebug('=== Checking Name keyword at index ' + nameKeywordIndex + ' ===');
-        
-        const line = lines[nameKeywordIndex];
-        logDebug('Line with keyword: "' + line + '"');
-        
-        const patterns = [
-          /(?:name|नाम|nama|nane|nam)\s*[:\/\-\s]\s*([A-Za-z\u0900-\u097F\s\.]{3,})/i,
-          /(?:name|नाम|nama|nane|nam)\s+([A-Za-z\u0900-\u097F\s\.]{3,})/i
-        ];
-        
-        for (const pattern of patterns) {
-          const match = line.match(pattern);
-          if (match) {
-            const candidate = cleanLine(match[1]);
-            logDebug('Pattern match: "' + candidate + '"');
-            if (!hasExcludedWord(candidate) && candidate.length > 3) {
-              logDebug('** FOUND NAME after keyword: "' + candidate + '" **');
-              return candidate;
+        function logDebug(message) {
+            console.log(message);
+            if (DEBUG_MODE && debugInfo) {
+                debugInfo.style.display = 'block';
+                debugInfo.innerHTML += message + '\n';
             }
-          }
         }
-        
-        if (nameKeywordIndex + 1 < lines.length) {
-          const nextLine = lines[nameKeywordIndex + 1];
-          const candidate = cleanLine(nextLine);
-          logDebug('Next line after keyword: "' + candidate + '"');
-          
-          if (!hasExcludedWord(candidate) && candidate.length > 3) {
-            const words = candidate.split(/\s+/).filter(w => w.length > 1);
-            if (words.length >= 2 && words.length <= 4) {
-              logDebug('** FOUND NAME on next line: "' + candidate + '" **');
-              return candidate;
+
+        // Helper: enable/disable scan button
+        function updateScanButton() {
+            startOcrBtn.disabled = !currentImageDataURL;
+        }
+
+        // Preview image from dataURL
+        function setImagePreview(dataURL) {
+            currentImageDataURL = dataURL;
+            aadhaarFrontBase64 = dataURL.split(',')[1];
+            imagePreviewDiv.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = dataURL;
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.objectFit = 'contain';
+            imagePreviewDiv.appendChild(img);
+            updateScanButton();
+            ocrStatusSpan.innerHTML = "📸 Image ready. Press 'SCAN & EXTRACT'.";
+        }
+
+        // Stop camera
+        async function stopCamera() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
             }
-          }
-        }
-      }
-
-      logDebug('');
-      logDebug('=== Searching between govt/uidai and dob/gender ===');
-      
-      const startSearch = Math.max(uidaiIndex, govtIndex, -1) + 1;
-      const endSearch = Math.min(
-        dobIndex !== -1 ? dobIndex : lines.length,
-        genderIndex !== -1 ? genderIndex : lines.length
-      );
-      
-      logDebug('Searching lines ' + startSearch + ' to ' + (endSearch - 1));
-
-      for (let i = startSearch; i < endSearch && i < lines.length; i++) {
-        const line = lines[i];
-        logDebug('Checking line ' + i + ': "' + line + '"');
-        
-        if (isPossibleName(line)) {
-          const candidate = cleanLine(line);
-          logDebug('** FOUND NAME in search range: "' + candidate + '" **');
-          return candidate;
-        }
-      }
-
-      logDebug('');
-      logDebug('=== Looking for lines with 2-4 words (no digits) ===');
-      
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        
-        if (isPossibleName(line)) {
-          const candidate = cleanLine(line);
-          logDebug('** FOUND NAME in fallback: "' + candidate + '" **');
-          return candidate;
-        }
-      }
-
-      logDebug('');
-      logDebug('No name found in OCR text');
-      return null;
-    }
-
-    async function performOCR(imageData) {
-      ocrStatus.style.display = 'block';
-      ocrStatus.textContent = 'Processing OCR...';
-      
-      try {
-        logDebug('');
-        logDebug('=== OCR Started ===');
-        
-        logDebug('Initializing Tesseract worker...');
-        const worker = await Tesseract.createWorker('eng');
-        logDebug('Worker initialized');
-        
-        logDebug('Running recognition...');
-        const ret = await worker.recognize(imageData);
-        logDebug('Recognition complete');
-        
-        const text = ret.data.text;
-        logDebug('');
-        logDebug('=== Full OCR Text ===');
-        logDebug(text);
-        logDebug('==================');
-        
-        const aadhaarRegex = /\d{4}\s*\d{4}\s*\d{4}/;
-        const aadhaarMatch = text.match(aadhaarRegex);
-        
-        if (aadhaarMatch) {
-          logDebug('');
-          logDebug('Aadhaar number found: ' + aadhaarMatch[0]);
-          fullAadhaarNumber = aadhaarMatch[0].replace(/\s/g, '');
-          const lastFour = fullAadhaarNumber.slice(-4);
-          document.getElementById('aadhaarNumber').value = lastFour;
-          logDebug('Last 4 digits: ' + lastFour);
-        } else {
-          logDebug('');
-          logDebug('No Aadhaar number found in OCR');
-        }
-        
-        const extractedName = extractNameFromText(text);
-        logDebug('');
-        logDebug('=== Final Extracted Name: ' + (extractedName || 'null') + ' ===');
-        
-        if (extractedName && !document.getElementById('name').value) {
-          document.getElementById('name').value = extractedName;
-          logDebug('Name field populated with: "' + extractedName + '"');
-        } else if (!extractedName) {
-          logDebug('No name extracted, user will need to enter manually');
-        }
-        
-        logDebug('Terminating Tesseract worker...');
-        await worker.terminate();
-        logDebug('Worker terminated');
-        
-        if (extractedName || aadhaarMatch) {
-          ocrStatus.textContent = 'OCR Complete!';
-          setTimeout(() => {
-            ocrStatus.style.display = 'none';
-            showForm();
-          }, 1500);
-        } else {
-          ocrStatus.textContent = 'OCR Complete. Please enter details manually.';
-          setTimeout(() => {
-            ocrStatus.style.display = 'none';
-            showForm();
-          }, 2000);
-        }
-        
-      } catch (error) {
-        logDebug('');
-        logDebug('*** OCR Error ***');
-        logDebug('Message: ' + error.message);
-        logDebug('Stack: ' + error.stack);
-        console.error('OCR Error:', error);
-        ocrStatus.textContent = 'OCR failed - you can enter details manually';
-        setTimeout(() => {
-          ocrStatus.style.display = 'none';
-          showForm();
-        }, 3000);
-      }
-    }
-
-    startCameraBtn.addEventListener('click', async () => {
-      await startCamera();
-    });
-
-    captureBtn.addEventListener('click', () => {
-      const imageData = captureImage();
-      const base64 = imageData.split(',')[1];
-      
-      aadhaarFrontBase64 = base64;
-      document.getElementById('capturedPreview').src = imageData;
-      document.getElementById('aadhaarPreview').style.display = 'flex';
-      
-      performOCR(imageData);
-    });
-
-    retakeBtn.addEventListener('click', retake);
-    stopCameraBtn.addEventListener('click', stopCamera);
-    stopCameraBtn2.addEventListener('click', stopCamera);
-
-    document.getElementById('skipScanBtn').addEventListener('click', () => {
-      stopCamera();
-      showForm();
-    });
-
-    document.getElementById('vendorForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const successMsg = document.getElementById('successMsg');
-      const errorMsg = document.getElementById('errorMsg');
-      
-      successMsg.style.display = 'none';
-      errorMsg.style.display = 'none';
-
-      try {
-        const aadhaarLastFour = document.getElementById('aadhaarNumber').value;
-        let storedAadhaar = null;
-        
-        if (aadhaarLastFour && aadhaarLastFour.length === 4) {
-          if (fullAadhaarNumber && fullAadhaarNumber.endsWith(aadhaarLastFour)) {
-            storedAadhaar = fullAadhaarNumber;
-          } else {
-            storedAadhaar = 'XXXXXXXX' + aadhaarLastFour;
-          }
+            video.pause();
+            video.srcObject = null;
+            video.style.display = 'none';
+            streamActive = false;
+            captureBtn.disabled = true;
         }
 
-        logDebug('');
-        logDebug('=== Submitting vendor entry ===');
-        logDebug('Name: ' + document.getElementById('name').value);
-        logDebug('Mobile: ' + document.getElementById('mobile').value);
-        logDebug('Company: ' + document.getElementById('companyName').value);
-        logDebug('Aadhaar: ' + storedAadhaar);
+        // Start camera
+        async function startCamera() {
+            if (streamActive) await stopCamera();
+            try {
+                const constraints = { video: { facingMode: "environment" }, audio: false };
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                currentStream = stream;
+                video.srcObject = stream;
+                video.style.display = 'block';
+                await video.play();
+                streamActive = true;
+                captureBtn.disabled = false;
+                ocrStatusSpan.innerHTML = "📹 Camera active. Position Aadhaar card & capture.";
+                imagePreviewDiv.style.display = 'none';
+                video.style.display = 'block';
+            } catch (err) {
+                logDebug('Camera error: ' + err.message);
+                ocrStatusSpan.innerHTML = "❌ Camera access denied. Use Upload Image.";
+                captureBtn.disabled = true;
+                streamActive = false;
+                video.style.display = 'none';
+                imagePreviewDiv.style.display = 'flex';
+            }
+        }
 
-        await API.createVendorEntry({
-          name: document.getElementById('name').value,
-          mobile: document.getElementById('mobile').value,
-          companyName: document.getElementById('companyName').value || null,
-          aadhaarNumber: storedAadhaar,
-          aadhaarFront: aadhaarFrontBase64,
-          aadhaarBack: null
+        // Capture frame from camera
+        function captureFrame() {
+            if (!streamActive || !video.videoWidth) {
+                ocrStatusSpan.innerHTML = "⚠️ Camera not ready. Open camera first.";
+                return;
+            }
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const capturedData = canvas.toDataURL('image/jpeg', 0.9);
+            setImagePreview(capturedData);
+            video.style.display = 'none';
+            imagePreviewDiv.style.display = 'flex';
+            if (streamActive) {
+                stopCamera();
+                captureBtn.disabled = true;
+            }
+            ocrStatusSpan.innerHTML = "✅ Frame captured! Now click SCAN & EXTRACT.";
+        }
+
+        // Handle file upload
+        function handleFileUpload(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setImagePreview(e.target.result);
+                if (streamActive) stopCamera();
+                video.style.display = 'none';
+                imagePreviewDiv.style.display = 'flex';
+                ocrStatusSpan.innerHTML = "🖼️ Upload complete. Click SCAN to extract data.";
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ---------- ULTRA CLEAN NAME EXTRACTION (removes leading stray 'g', special chars, extra spaces) ----------
+        function cleanExtractedName(rawName) {
+            if (!rawName) return "";
+            
+            logDebug('--- Cleaning raw name: "' + rawName + '"');
+            
+            let cleaned = rawName.replace(/^[^A-Za-z]*/, '');
+            cleaned = cleaned.replace(/^[a-zA-Z]\s+/, '');
+            cleaned = cleaned.replace(/^[\W\d_]+/, '');
+            cleaned = cleaned.replace(/\s+/g, ' ').trim();
+            
+            if (cleaned.length > 2 && /^[a-z]\s+[A-Z]/.test(cleaned)) {
+                cleaned = cleaned.substring(2).trim();
+            }
+            
+            if (cleaned.length > 0 && /^[a-z]/.test(cleaned)) {
+                cleaned = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+            }
+            
+            const words = cleaned.split(/\s+/);
+            if (words.length > 1 && words[0].length === 1 && /[a-zA-Z]/.test(words[0])) {
+                words.shift();
+                cleaned = words.join(' ');
+            }
+            
+            if (cleaned.length < 3 || !cleaned.includes(' ')) {
+                if (cleaned.length >= 2 && /^[A-Z][a-z]+$/.test(cleaned)) {
+                    return cleaned;
+                }
+                return "";
+            }
+            
+            logDebug('--- Cleaned name: "' + cleaned + '"');
+            return cleaned;
+        }
+        
+        function advancedNameExtraction(rawText) {
+            logDebug('');
+            logDebug('=== Starting Name Extraction ===');
+            
+            let text = rawText.replace(/\n/g, ' ').replace(/\r/g, ' ');
+            text = text.replace(/\s+/g, ' ').trim();
+            
+            logDebug('Text (single line): "' + text.substring(0, 200) + '..."');
+            
+            const explicitPatterns = [
+                /(?:Name|Full Name|Applicant['']?s Name|Cardholder Name)[\s:]*([A-Z][a-zA-Z\s\.]{2,45}?)(?=\s+(?:Address|DOB|Year|Aadhaar|UID|\d{4}|\/|$))/i,
+                /(?:S\/O|D\/O|W\/O)[:\s]*([A-Z][a-z]+\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
+                /(?:^|\.\s)([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})(?=\s+\d{4}|\s+[A-Z]{3,})/gm
+            ];
+            
+            for (let i = 0; i < explicitPatterns.length; i++) {
+                let match = text.match(explicitPatterns[i]);
+                if (match && match[1]) {
+                    let candidate = match[1].trim();
+                    candidate = candidate.replace(/[^a-zA-Z\s]/g, '').replace(/\s+/g, ' ').trim();
+                    logDebug('Explicit pattern ' + (i+1) + ' match: "' + candidate + '"');
+                    if (candidate.length > 3 && candidate.length < 55) {
+                        const cleaned = cleanExtractedName(candidate);
+                        if (cleaned) {
+                            logDebug('=== Returning cleaned name from explicit pattern ===');
+                            return cleaned;
+                        }
+                    }
+                }
+            }
+            
+            const lines = rawText.split(/\r?\n/);
+            logDebug('');
+            logDebug('=== Checking lines (heuristic) ===');
+            
+            let bestName = "";
+            let maxScore = 0;
+            
+            for (let i = 0; i < lines.length; i++) {
+                let cleanLine = lines[i].trim();
+                cleanLine = cleanLine.replace(/^[•\-*>_\s\d]+/, '');
+                
+                if (cleanLine.length < 4 || cleanLine.length > 60) continue;
+                
+                const words = cleanLine.split(/\s+/);
+                if (words.length < 2) continue;
+                
+                const digitCount = (cleanLine.match(/\d/g) || []).length;
+                if (digitCount > 3) continue;
+                
+                let capitalWords = 0;
+                for (let w of words) {
+                    if (w.length > 1 && /^[A-Z][a-z]/.test(w)) capitalWords++;
+                }
+                
+                let score = capitalWords * 3;
+                
+                if (!/aadhaar|uid|enrolment|address|care of|father|mother|dob/i.test(cleanLine)) {
+                    score += 4;
+                }
+                
+                if (/^[A-Z][a-z]/.test(cleanLine)) {
+                    score += 5;
+                }
+                
+                logDebug('Line ' + i + ' "' + cleanLine.substring(0, 40) + '..." score=' + score + ' capWords=' + capitalWords);
+                
+                if (score > maxScore && capitalWords >= 1) {
+                    maxScore = score;
+                    bestName = cleanLine.replace(/[^a-zA-Z\s]/g, '').trim();
+                }
+            }
+            
+            if (bestName) {
+                logDebug('');
+                logDebug('=== Best heuristic name: "' + bestName + '" ===');
+                const cleaned = cleanExtractedName(bestName);
+                if (cleaned) {
+                    logDebug('=== Returning cleaned heuristic name ===');
+                    return cleaned;
+                }
+            }
+            
+            logDebug('');
+            logDebug('=== Trying fallback pattern (two capitalized words) ===');
+            
+            const fallbackMatch = text.match(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b/);
+            if (fallbackMatch) {
+                logDebug('Fallback match: "' + fallbackMatch[1] + '"');
+                const cleaned = cleanExtractedName(fallbackMatch[1]);
+                if (cleaned) {
+                    logDebug('=== Returning cleaned fallback name ===');
+                    return cleaned;
+                }
+            }
+            
+            logDebug('');
+            logDebug('=== No name extracted ===');
+            return "";
+        }
+        
+        function extractLast4Digits(rawText) {
+            logDebug('');
+            logDebug('=== Extracting last 4 Aadhaar digits ===');
+            
+            let fullAadhaar = null;
+            const groupPattern = /\b(\d{4})[\s\-]?(\d{4})[\s\-]?(\d{4})\b/g;
+            let match;
+            
+            while ((match = groupPattern.exec(rawText)) !== null) {
+                let candidate = match[1] + match[2] + match[3];
+                if (/^\d{12}$/.test(candidate)) {
+                    fullAadhaar = candidate;
+                    logDebug('Found full Aadhaar (grouped): ' + fullAadhaar);
+                    break;
+                }
+            }
+            
+            if (!fullAadhaar) {
+                const directMatch = rawText.match(/\b\d{12}\b/);
+                if (directMatch) {
+                    fullAadhaar = directMatch[0];
+                    logDebug('Found full Aadhaar (direct): ' + fullAadhaar);
+                }
+            }
+            
+            if (fullAadhaar && fullAadhaar.length === 12) {
+                const last4 = fullAadhaar.slice(-4);
+                logDebug('=== Returning last 4 digits: ' + last4 + ' ===');
+                return last4;
+            }
+            
+            const keywordPattern = /(?:Aadhaar|UID|Enrolment|Number)[\s:]*\.?\s*[\*\#]?(\d{4})/i;
+            let kwMatch = rawText.match(keywordPattern);
+            if (kwMatch && kwMatch[1]) {
+                logDebug('Found 4 digits after keyword: ' + kwMatch[1]);
+                return kwMatch[1];
+            }
+            
+            const allFourDigits = rawText.match(/\b(\d{4})\b/g);
+            if (allFourDigits) {
+                for (let quad of allFourDigits) {
+                    let num = parseInt(quad, 10);
+                    if ((num < 1900 || num > 2030) && quad !== "0000") {
+                        logDebug('Found 4-digit group (not year): ' + quad);
+                        return quad;
+                    }
+                }
+                if (allFourDigits.length) {
+                    logDebug('Using first 4-digit group: ' + allFourDigits[0]);
+                    return allFourDigits[0];
+                }
+            }
+            
+            logDebug('=== No Aadhaar digits found ===');
+            return "";
+        }
+        
+        // ------------------- OCR ENGINE -------------------
+        async function performSmartOCR() {
+            if (!currentImageDataURL) {
+                ocrStatusSpan.innerHTML = "⚠️ Please capture or upload an Aadhaar image first.";
+                return;
+            }
+            
+            ocrStatusSpan.innerHTML = "<span class='loader'></span> OCR processing... cleaning name from stray characters";
+            startOcrBtn.disabled = true;
+            
+            try {
+                logDebug('');
+                logDebug('========================================');
+                logDebug('=== OCR STARTED ===');
+                logDebug('========================================');
+                
+                logDebug('');
+                logDebug('--- Creating Tesseract worker ---');
+                
+                const worker = await Tesseract.createWorker('eng', 1, {
+                    logger: m => console.log(m)
+                });
+                
+                logDebug('--- Setting Tesseract parameters ---');
+                
+                await worker.setParameters({
+                    tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 :./-',
+                    tessedit_pageseg_mode: '6',
+                    preserve_interword_spaces: '1'
+                });
+                
+                logDebug('--- Running recognition ---');
+                
+                const { data: { text } } = await worker.recognize(currentImageDataURL);
+                await worker.terminate();
+                
+                logDebug('');
+                logDebug('========================================');
+                logDebug('=== OCR RAW TEXT ===');
+                logDebug('========================================');
+                logDebug(text);
+                logDebug('========================================');
+                
+                const recognizedFullText = text;
+                
+                logDebug('');
+                logDebug('--- Extracting name ---');
+                let detectedName = advancedNameExtraction(recognizedFullText);
+                
+                logDebug('');
+                logDebug('--- Extracting last 4 Aadhaar digits ---');
+                const detectedLast4 = extractLast4Digits(recognizedFullText);
+                
+                if (detectedName) {
+                    detectedName = cleanExtractedName(detectedName);
+                    detectedName = detectedName.replace(/^[^A-Za-z]*/, '').replace(/^[a-z]\s+/, '');
+                    if (detectedName.length > 0 && detectedName[0] !== detectedName[0].toUpperCase()) {
+                        detectedName = detectedName.charAt(0).toUpperCase() + detectedName.slice(1);
+                    }
+                }
+                
+                lastExtractedName = detectedName || "";
+                lastExtractedLast4 = detectedLast4 || "";
+                
+                logDebug('');
+                logDebug('========================================');
+                logDebug('=== FINAL RESULTS ===');
+                logDebug('========================================');
+                logDebug('Name: "' + lastExtractedName + '"');
+                logDebug('Aadhaar Last 4: "' + lastExtractedLast4 + '"');
+                logDebug('========================================');
+                
+                if (lastExtractedName) {
+                    ocrStatusSpan.innerHTML = "✅ Name cleaned successfully! Stray leading characters removed.";
+                    cleanNote.innerHTML = "✨ Name cleaned: removed leading stray letters (like 'g', spaces, symbols)";
+                } else {
+                    ocrStatusSpan.innerHTML = "⚠️ Name couldn't be auto-detected. You can manually type name below.";
+                    cleanNote.innerHTML = "✏️ You can edit name manually if needed";
+                }
+                
+                if (!lastExtractedLast4) {
+                    ocrStatusSpan.innerHTML += " ⚠️ Last 4 digits missing – you can add manually";
+                }
+                
+                formName.value = lastExtractedName || "";
+                formAadhaarLast4.value = lastExtractedLast4 || "";
+                
+                entryFormCard.style.display = 'block';
+                entryFormCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+            } catch (err) {
+                logDebug('');
+                logDebug('=== OCR ERROR ===');
+                logDebug('Message: ' + err.message);
+                logDebug('Stack: ' + err.stack);
+                console.error('OCR Error:', err);
+                ocrStatusSpan.innerHTML = "❌ OCR failed: " + (err.message || "Try clearer image.");
+                lastExtractedName = "";
+                lastExtractedLast4 = "";
+            } finally {
+                startOcrBtn.disabled = false;
+                if (!currentImageDataURL) startOcrBtn.disabled = true;
+            }
+        }
+        
+        // Submit handler
+        async function handleFormSubmit() {
+            const nameValue = formName.value.trim();
+            const mobileValue = formMobile.value.trim();
+            const aadhaarValue = formAadhaarLast4.value.trim();
+            const companyValue = formCompany.value.trim() || null;
+            
+            if (!nameValue) {
+                alert('⚠️ Please enter a name.');
+                return;
+            }
+            
+            if (!mobileValue) {
+                alert('⚠️ Please enter mobile number.');
+                return;
+            }
+            
+            if (mobileValue && !/^\d{10}$/.test(mobileValue)) {
+                alert('⚠️ Mobile number must be exactly 10 digits.');
+                return;
+            }
+            
+            if (aadhaarValue && !/^\d{4}$/.test(aadhaarValue)) {
+                alert('⚠️ Aadhaar last 4 digits must be 4 digits.');
+                return;
+            }
+            
+            successMsg.style.display = 'none';
+            errorMsg.style.display = 'none';
+
+            try {
+                let storedAadhaar = null;
+                if (aadhaarValue && aadhaarValue.length === 4) {
+                    storedAadhaar = 'XXXXXXXX' + aadhaarValue;
+                }
+
+                logDebug('');
+                logDebug('=== Submitting to API ===');
+                logDebug('Name: ' + nameValue);
+                logDebug('Mobile: ' + mobileValue);
+                logDebug('Company: ' + companyValue);
+                logDebug('Aadhaar: ' + storedAadhaar);
+
+                await API.createVendorEntry({
+                    name: nameValue,
+                    mobile: mobileValue,
+                    companyName: companyValue,
+                    aadhaarNumber: storedAadhaar,
+                    aadhaarFront: aadhaarFrontBase64,
+                    aadhaarBack: null
+                });
+
+                successMsg.textContent = 'Entry created successfully!';
+                successMsg.style.display = 'block';
+                
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 2000);
+                
+            } catch (error) {
+                logDebug('');
+                logDebug('=== SUBMIT ERROR ===');
+                logDebug('Message: ' + error.message);
+                errorMsg.textContent = error.message || 'Failed to create entry';
+                errorMsg.style.display = 'block';
+            }
+        }
+        
+        // Event listeners
+        openCameraBtn.addEventListener('click', startCamera);
+        captureBtn.addEventListener('click', captureFrame);
+        fileUpload.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                handleFileUpload(e.target.files[0]);
+                if (streamActive) stopCamera();
+                video.style.display = 'none';
+                imagePreviewDiv.style.display = 'flex';
+            }
         });
-
-        successMsg.style.display = 'block';
-        e.target.reset();
-        aadhaarFrontBase64 = null;
-        fullAadhaarNumber = '';
-        document.getElementById('aadhaarPreview').style.display = 'none';
-        document.getElementById('capturedPreview').src = '';
+        startOcrBtn.addEventListener('click', performSmartOCR);
+        submitBtn.addEventListener('click', handleFormSubmit);
         
-        setTimeout(() => {
-          window.location.href = 'dashboard.html';
-        }, 2000);
-      } catch (error) {
-        logDebug('');
-        logDebug('*** Submit Error ***');
-        logDebug('Message: ' + error.message);
-        errorMsg.textContent = error.message || 'Failed to create entry';
-        errorMsg.style.display = 'block';
-      }
-    });
-  </script>
+        updateScanButton();
+        
+        imagePreviewDiv.innerHTML = '📷 No image captured<br><span style="font-size: 12px;">Open Camera or Upload Aadhaar</span>';
+        
+        window.addEventListener('beforeunload', () => {
+            if (currentStream) currentStream.getTracks().forEach(t => t.stop());
+        });
+    </script>
 </body>
 </html>
