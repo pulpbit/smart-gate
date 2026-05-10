@@ -61,6 +61,10 @@
       color: #4a5568;
       font-weight: 500;
     }
+    label .required {
+      color: #e53e3e;
+      margin-left: 2px;
+    }
     input, select, textarea {
       width: 100%;
       padding: 12px 16px;
@@ -122,6 +126,21 @@
     .file-upload input {
       display: none;
     }
+    .section-divider {
+      border-top: 1px solid #e2e8f0;
+      margin: 24px 0;
+    }
+    .hidden-field {
+      display: none;
+    }
+    .gate-info {
+      background: #ebf8ff;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      color: #2b6cb0;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
@@ -135,24 +154,97 @@
       <h2>Register Inward Material</h2>
       <div class="success" id="successMsg">Entry created successfully!</div>
       <div class="error" id="errorMsg"></div>
+      
+      <div class="gate-info" id="gateInfo">
+        Entry Gate: <span id="currentGate">-</span>
+      </div>
+
       <form id="inwardForm">
         <div class="form-group">
-          <label for="dcNumber">DC Number *</label>
-          <input type="text" id="dcNumber" placeholder="Enter DC number" required>
+          <label for="prPoNumber">PR/PO Number</label>
+          <input type="text" id="prPoNumber" placeholder="Enter PR/PO number">
         </div>
 
         <div class="form-group">
-          <label for="dcDate">DC Date *</label>
-          <input type="date" id="dcDate" required>
+          <label for="assetBelongsTo">Asset Belongs To<span class="required">*</span></label>
+          <select id="assetBelongsTo" required>
+            <option value="">Select asset belongs to</option>
+            <option value="CtrlS">CtrlS</option>
+            <option value="Customer">Customer</option>
+            <option value="Project">Project</option>
+          </select>
         </div>
 
         <div class="form-group">
-          <label for="vendorName">Vendor Name *</label>
-          <input type="text" id="vendorName" placeholder="Enter vendor name" required>
+          <label for="typeOfInward">Type of Inward<span class="required">*</span></label>
+          <select id="typeOfInward" required>
+            <option value="">Select type of inward</option>
+            <option value="Inward Non Returnable">Inward Non Returnable</option>
+            <option value="Inward Returnable">Inward Returnable</option>
+            <option value="Internal Movement Inward">Internal Movement Inward</option>
+          </select>
+        </div>
+
+        <div class="form-group hidden-field" id="customerNameGroup">
+          <label for="customerName">Customer Name<span class="required">*</span></label>
+          <select id="customerName">
+            <option value="">Select customer</option>
+          </select>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="form-group">
+          <label for="requesterName">Requester Name<span class="required">*</span></label>
+          <input type="text" id="requesterName" placeholder="Enter requester name" required>
         </div>
 
         <div class="form-group">
-          <label for="materialDescription">Material Description *</label>
+          <label for="requesterEmail">Requester Email<span class="required">*</span></label>
+          <input type="email" id="requesterEmail" placeholder="Enter requester email" required>
+        </div>
+
+        <div class="form-group">
+          <label for="departmentName">Department Name</label>
+          <input type="text" id="departmentName" placeholder="Enter department name">
+        </div>
+
+        <div class="form-group">
+          <label for="shipmentNumber">Shipment Number</label>
+          <input type="text" id="shipmentNumber" placeholder="Enter shipment number">
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="form-group">
+          <label for="vehicleNumber">Vehicle Number<span class="required">*</span></label>
+          <input type="text" id="vehicleNumber" placeholder="Enter vehicle number" required>
+        </div>
+
+        <div class="form-group">
+          <label for="vendorName">Vendor Name<span class="required">*</span></label>
+          <select id="vendorName" required>
+            <option value="">Select vendor</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="invoiceDcNumber">Invoice / DC Number<span class="required">*</span></label>
+          <input type="text" id="invoiceDcNumber" placeholder="Enter invoice/DC number" required>
+        </div>
+
+        <div class="form-group">
+          <label for="invoiceValue">Invoice Value (₹)<span class="required">*</span></label>
+          <input type="number" id="invoiceValue" placeholder="Enter invoice value" step="0.01" min="0" required>
+        </div>
+
+        <div class="form-group">
+          <label for="itemsQty">Items Qty<span class="required">*</span></label>
+          <input type="number" id="itemsQty" placeholder="Enter quantity" min="1" required>
+        </div>
+
+        <div class="form-group">
+          <label for="materialDescription">Material Description<span class="required">*</span></label>
           <select id="materialDescription" required>
             <option value="">Select material description</option>
             <option value="As per attached DC">As per attached DC</option>
@@ -160,27 +252,19 @@
         </div>
 
         <div class="form-group">
-          <label for="vehicleNumber">Vehicle Number</label>
-          <input type="text" id="vehicleNumber" placeholder="Enter vehicle number">
+          <label for="entrySerialNumber">Entry Serial Number<span class="required">*</span></label>
+          <input type="text" id="entrySerialNumber" placeholder="Enter entry serial number" required>
         </div>
 
         <div class="form-group">
-          <label for="driverName">Driver Name</label>
-          <input type="text" id="driverName" placeholder="Enter driver name">
+          <label for="remarks">Remarks</label>
+          <textarea id="remarks" placeholder="Enter remarks"></textarea>
         </div>
 
-        <div class="form-group">
-          <label for="driverMobile">Driver Mobile</label>
-          <input type="tel" id="driverMobile" placeholder="Enter mobile number">
-        </div>
+        <div class="section-divider"></div>
 
         <div class="form-group">
-          <label for="quantity">Quantity</label>
-          <input type="number" id="quantity" placeholder="Enter quantity">
-        </div>
-
-        <div class="form-group">
-          <label>DC Document (PDF only, max 10MB)</label>
+          <label>Document (PDF only, max 10MB)</label>
           <div class="file-upload" id="fileUpload">
             <p>Click to upload or drag and drop</p>
             <p style="color: #718096; font-size: 12px; margin-top: 8px;">PDF only, 10MB max</p>
@@ -201,11 +285,17 @@
       window.location.href = 'index.html';
     }
 
-    document.getElementById('dcDate').valueAsDate = new Date();
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    document.getElementById('currentGate').textContent = user.gateNumber || user.username || 'Gate';
 
     const fileUpload = document.getElementById('fileUpload');
     const fileInput = document.getElementById('document');
     const fileName = document.getElementById('fileName');
+    const assetBelongsTo = document.getElementById('assetBelongsTo');
+    const typeOfInward = document.getElementById('typeOfInward');
+    const customerNameGroup = document.getElementById('customerNameGroup');
+    const customerNameSelect = document.getElementById('customerName');
+    const vendorNameSelect = document.getElementById('vendorName');
 
     fileUpload.addEventListener('click', () => fileInput.click());
 
@@ -225,6 +315,55 @@
         fileName.textContent = file.name;
       }
     });
+
+    assetBelongsTo.addEventListener('change', (e) => {
+      const value = e.target.value;
+      
+      if (value === 'Customer') {
+        customerNameGroup.classList.remove('hidden-field');
+        customerNameSelect.required = true;
+        typeOfInward.value = 'Inward Non Returnable';
+        typeOfInward.disabled = true;
+      } else {
+        customerNameGroup.classList.add('hidden-field');
+        customerNameSelect.required = false;
+        customerNameSelect.value = '';
+        typeOfInward.disabled = false;
+      }
+    });
+
+    async function loadCustomers() {
+      try {
+        const customers = await API.getCustomers();
+        customerNameSelect.innerHTML = '<option value="">Select customer</option>';
+        customers.forEach(customer => {
+          const option = document.createElement('option');
+          option.value = customer.name;
+          option.textContent = customer.name;
+          customerNameSelect.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Failed to load customers:', error);
+      }
+    }
+
+    async function loadVendors() {
+      try {
+        const vendors = await API.getMasterVendors();
+        vendorNameSelect.innerHTML = '<option value="">Select vendor</option>';
+        vendors.forEach(vendor => {
+          const option = document.createElement('option');
+          option.value = vendor.name;
+          option.textContent = vendor.name;
+          vendorNameSelect.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Failed to load vendors:', error);
+      }
+    }
+
+    loadCustomers();
+    loadVendors();
 
     document.getElementById('inwardForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -246,22 +385,42 @@
       }
 
       try {
+        const customerName = assetBelongsTo.value === 'Customer' 
+          ? document.getElementById('customerName').value 
+          : null;
+
+        const invoiceValue = document.getElementById('invoiceValue').value;
+        const itemsQty = document.getElementById('itemsQty').value;
+
         await API.createMaterialInward({
-          dcNumber: document.getElementById('dcNumber').value,
-          dcDate: document.getElementById('dcDate').value,
+          prPoNumber: document.getElementById('prPoNumber').value || null,
+          assetBelongsTo: document.getElementById('assetBelongsTo').value,
+          typeOfInward: document.getElementById('typeOfInward').value,
+          customerName: customerName,
+          requesterName: document.getElementById('requesterName').value,
+          requesterEmail: document.getElementById('requesterEmail').value,
+          departmentName: document.getElementById('departmentName').value || null,
+          shipmentNumber: document.getElementById('shipmentNumber').value || null,
+          vehicleNumber: document.getElementById('vehicleNumber').value,
           vendorName: document.getElementById('vendorName').value,
+          invoiceDcNumber: document.getElementById('invoiceDcNumber').value,
+          invoiceValue: invoiceValue ? parseFloat(invoiceValue) : 0,
+          itemsQty: itemsQty ? parseInt(itemsQty) : 0,
           materialDescription: document.getElementById('materialDescription').value,
-          vehicleNumber: document.getElementById('vehicleNumber').value || null,
-          driverName: document.getElementById('driverName').value || null,
-          driverMobile: document.getElementById('driverMobile').value || null,
-          quantity: document.getElementById('quantity').value ? parseInt(document.getElementById('quantity').value) : null,
+          entrySerialNumber: document.getElementById('entrySerialNumber').value,
+          remarks: document.getElementById('remarks').value || null,
           document: documentBase64
         });
 
         successMsg.style.display = 'block';
         e.target.reset();
-        document.getElementById('dcDate').valueAsDate = new Date();
         fileName.textContent = '';
+        customerNameGroup.classList.add('hidden-field');
+        typeOfInward.disabled = false;
+        
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 2000);
       } catch (error) {
         errorMsg.textContent = error.message || 'Failed to create entry';
         errorMsg.style.display = 'block';

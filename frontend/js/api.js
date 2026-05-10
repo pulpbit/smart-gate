@@ -66,6 +66,54 @@ const API = {
     });
   },
 
+  async getCustomers() {
+    return this.request('/master/customers');
+  },
+
+  async createCustomer(customer) {
+    return this.request('/master/customers', {
+      method: 'POST',
+      body: JSON.stringify(customer)
+    });
+  },
+
+  async updateCustomer(id, data) {
+    return this.request(`/master/customers/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  },
+
+  async deleteCustomer(id) {
+    return this.request(`/master/customers/${id}`, {
+      method: 'DELETE'
+    });
+  },
+
+  async getMasterVendors() {
+    return this.request('/master/vendors');
+  },
+
+  async createMasterVendor(vendor) {
+    return this.request('/master/vendors', {
+      method: 'POST',
+      body: JSON.stringify(vendor)
+    });
+  },
+
+  async updateMasterVendor(id, data) {
+    return this.request(`/master/vendors/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  },
+
+  async deleteMasterVendor(id) {
+    return this.request(`/master/vendors/${id}`, {
+      method: 'DELETE'
+    });
+  },
+
   async createMaterialInward(data) {
     return this.request('/material/inward', {
       method: 'POST',

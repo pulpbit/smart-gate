@@ -4,6 +4,7 @@ import { materialRouter } from './routes/material'
 import { vendorRouter } from './routes/vendor'
 import { vehicleRouter } from './routes/vehicle'
 import { userRouter } from './routes/user'
+import { masterRouter } from './routes/master'
 import { logger } from 'hono/logger'
 import { cors } from 'hono/cors'
 
@@ -33,5 +34,6 @@ app.route('/api/material', materialRouter)
 app.route('/api/vendor', vendorRouter)
 app.route('/api/vehicle', vehicleRouter)
 app.route('/api/users', userRouter)
+app.route('/api/master', masterRouter)
 
 export default app
