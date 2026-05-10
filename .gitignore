@@ -23,11 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 
-# Build artifacts
-*.cjs
-*.d.ts
-*.js
-*.mjs
+# Build artifacts (already covered by /dist)
 
 # Wrangler
 .wrangler
