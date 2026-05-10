@@ -36,11 +36,73 @@
       cursor: pointer;
       font-size: 14px;
       text-decoration: none;
+      transition: background 0.2s;
+    }
+    .back-btn:hover {
+      background: rgba(255,255,255,0.3);
     }
     .container {
       max-width: 1200px;
       margin: 32px auto;
       padding: 0 16px;
+    }
+    .toolbar {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (min-width: 768px) {
+      .toolbar {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+    .search-box {
+      position: relative;
+      flex: 1;
+      max-width: 400px;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 12px 16px 12px 44px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-box input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    .search-box .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #718096;
+      font-size: 18px;
+    }
+    .new-entry-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .new-entry-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
     .card {
       background: white;
@@ -48,31 +110,73 @@
       padding: 24px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
       margin-bottom: 16px;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      transform: translateY(-2px);
     }
     .card-header {
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 12px;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    @media (min-width: 768px) {
+      .card-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+    }
+    .card-title-section {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
     .card-title {
       font-size: 18px;
       font-weight: 600;
       color: #1a1a1a;
     }
+    .card-subtitle {
+      color: #718096;
+      font-size: 14px;
+    }
+    .card-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      gap: 4px;
+      background: #fed7d7;
+      color: #c53030;
+    }
     .card-details {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
+    }
+    @media (min-width: 768px) {
+      .card-details {
+        grid-template-columns: repeat(4, 1fr);
+      }
     }
     .detail {
       display: flex;
       flex-direction: column;
+      gap: 2px;
     }
     .detail-label {
       font-size: 12px;
       color: #718096;
-      margin-bottom: 4px;
     }
     .detail-value {
       font-size: 14px;
@@ -82,20 +186,103 @@
     .empty-state {
       text-align: center;
       padding: 60px 20px;
-      color: #718096;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .empty-state .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+    .empty-state h3 {
+      color: #1a1a1a;
+      margin-bottom: 8px;
+      font-size: 20px;
     }
     .empty-state p {
-      margin-top: 8px;
+      color: #718096;
+      margin-bottom: 24px;
+    }
+    .empty-state .new-entry-btn {
+      display: inline-flex;
+    }
+    .no-results {
+      text-align: center;
+      padding: 40px 20px;
+      color: #718096;
+    }
+    .no-results .icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (min-width: 768px) {
+      .stats-row {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #667eea;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: #718096;
     }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>Material Outward List</h1>
+    <h1>Material Outward</h1>
     <a href="dashboard.html" class="back-btn">Back to Dashboard</a>
   </div>
 
   <div class="container">
+    <div class="stats-row">
+      <div class="stat-card">
+        <span class="stat-value" id="totalCount">0</span>
+        <span class="stat-label">Total Entries</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="thisMonthCount">0</span>
+        <span class="stat-label">This Month</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="totalQty">0</span>
+        <span class="stat-label">Total Items</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="totalVendors">0</span>
+        <span class="stat-label">Unique Vendors</span>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search by DC, Vehicle, Vendor...">
+      </div>
+      <a href="material-outward.html" class="new-entry-btn">
+        <span>➕</span>
+        New Outward Entry
+      </a>
+    </div>
+
     <div id="outwardList"></div>
   </div>
 
@@ -106,15 +293,35 @@
       window.location.href = 'index.html';
     }
 
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+
     let outwardItems = [];
+    let filteredItems = [];
 
     async function loadOutward() {
       try {
         outwardItems = await API.getMaterialOutward();
+        filteredItems = [...outwardItems];
+        updateStats();
         renderOutward();
       } catch (error) {
         console.error('Failed to load outward materials:', error);
+        renderError(error);
       }
+    }
+
+    function updateStats() {
+      const now = new Date();
+      const thisMonth = now.getMonth();
+      const thisYear = now.getFullYear();
+      
+      document.getElementById('totalCount').textContent = outwardItems.length;
+      document.getElementById('thisMonthCount').textContent = outwardItems.filter(i => {
+        const date = new Date(i.created_at);
+        return date.getMonth() === thisMonth && date.getFullYear() === thisYear;
+      }).length;
+      document.getElementById('totalQty').textContent = outwardItems.reduce((sum, i) => sum + (parseInt(i.quantity) || 0), 0);
+      document.getElementById('totalVendors').textContent = new Set(outwardItems.map(i => i.vendor_name).filter(Boolean)).size;
     }
 
     function renderOutward() {
@@ -123,56 +330,127 @@
       if (outwardItems.length === 0) {
         container.innerHTML = `
           <div class="empty-state">
+            <div class="icon">📦</div>
             <h3>No outward material entries yet</h3>
-            <p>Register an outward material entry to see it here</p>
+            <p>Register your first outward material entry to get started</p>
+            <a href="material-outward.html" class="new-entry-btn">
+              <span>➕</span>
+              New Outward Entry
+            </a>
           </div>
         `;
         return;
       }
 
-      container.innerHTML = outwardItems.map(item => `
-        <div class="card">
-          <div class="card-header">
-            <div>
-              <div class="card-title">DC: ${item.dc_number}</div>
-              <div style="color: #718096; font-size: 14px; margin-top: 4px;">
-                ${item.vendor_name}
+      if (filteredItems.length === 0) {
+        container.innerHTML = `
+          <div class="no-results">
+            <div class="icon">🔍</div>
+            <h3>No results found</h3>
+            <p>Try a different search term</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filteredItems.map(item => {
+        const dcNumber = item.dc_number || 'N/A';
+        const vendorName = item.vendor_name || 'N/A';
+        const vehicleNumber = item.vehicle_number || 'N/A';
+        const driverName = item.driver_name || 'N/A';
+        const quantity = item.quantity || 0;
+        const materialDescription = item.material_description || 'N/A';
+        const dcDate = item.dc_date || 'N/A';
+        const gateNumber = item.gate_number || 'N/A';
+        const createdAt = item.created_at ? new Date(item.created_at).toLocaleString() : 'N/A';
+
+        return `
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title-section">
+                <div class="card-title">DC: ${dcNumber}</div>
+                <div class="card-subtitle">${vendorName}</div>
+              </div>
+              <div class="card-badges">
+                <span class="badge">
+                  <span>📤</span>
+                  Outward
+                </span>
+              </div>
+            </div>
+            <div class="card-details">
+              <div class="detail">
+                <span class="detail-label">DC Date</span>
+                <span class="detail-value">${dcDate}</span>
+              </div>
+              <div class="detail">
+                <span class="detail-label">Vehicle Number</span>
+                <span class="detail-value">${vehicleNumber}</span>
+              </div>
+              <div class="detail">
+                <span class="detail-label">Driver</span>
+                <span class="detail-value">${driverName}</span>
+              </div>
+              <div class="detail">
+                <span class="detail-label">Quantity</span>
+                <span class="detail-value">${quantity} items</span>
+              </div>
+              <div class="detail">
+                <span class="detail-label">Material</span>
+                <span class="detail-value">${materialDescription}</span>
+              </div>
+              <div class="detail">
+                <span class="detail-label">Gate</span>
+                <span class="detail-value">${gateNumber}</span>
+              </div>
+              <div class="detail">
+                <span class="detail-label">Entry Time</span>
+                <span class="detail-value">${createdAt}</span>
               </div>
             </div>
           </div>
-          <div class="card-details">
-            <div class="detail">
-              <span class="detail-label">DC Date</span>
-              <span class="detail-value">${item.dc_date}</span>
-            </div>
-            <div class="detail">
-              <span class="detail-label">Material Description</span>
-              <span class="detail-value">${item.material_description || 'N/A'}</span>
-            </div>
-            <div class="detail">
-              <span class="detail-label">Vehicle Number</span>
-              <span class="detail-value">${item.vehicle_number || 'N/A'}</span>
-            </div>
-            <div class="detail">
-              <span class="detail-label">Driver</span>
-              <span class="detail-value">${item.driver_name || 'N/A'}</span>
-            </div>
-            <div class="detail">
-              <span class="detail-label">Quantity</span>
-              <span class="detail-value">${item.quantity || 'N/A'}</span>
-            </div>
-            <div class="detail">
-              <span class="detail-label">Entry Time</span>
-              <span class="detail-value">${new Date(item.created_at).toLocaleString()}</span>
-            </div>
-            <div class="detail">
-              <span class="detail-label">Gate</span>
-              <span class="detail-value">${item.gate_number || 'N/A'}</span>
-            </div>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
+
+    function renderError(error) {
+      const container = document.getElementById('outwardList');
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">⚠️</div>
+          <h3>Failed to load entries</h3>
+          <p>${error.message || 'Please try again later'}</p>
+        </div>
+      `;
+    }
+
+    function filterItems(searchTerm) {
+      if (!searchTerm || searchTerm.trim() === '') {
+        filteredItems = [...outwardItems];
+      } else {
+        const term = searchTerm.toLowerCase().trim();
+        filteredItems = outwardItems.filter(item => {
+          const dcNumber = item.dc_number || '';
+          const vendorName = item.vendor_name || '';
+          const vehicleNumber = item.vehicle_number || '';
+          const driverName = item.driver_name || '';
+          const materialDescription = item.material_description || '';
+
+          return (
+            dcNumber.toLowerCase().includes(term) ||
+            vendorName.toLowerCase().includes(term) ||
+            vehicleNumber.toLowerCase().includes(term) ||
+            driverName.toLowerCase().includes(term) ||
+            materialDescription.toLowerCase().includes(term)
+          );
+        });
+      }
+      renderOutward();
+    }
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      filterItems(e.target.value);
+    });
 
     loadOutward();
   </script>

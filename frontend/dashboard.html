@@ -40,6 +40,7 @@
       border-radius: 6px;
       cursor: pointer;
       font-size: 14px;
+      transition: background 0.2s;
     }
     .logout-btn:hover {
       background: rgba(255,255,255,0.3);
@@ -55,13 +56,15 @@
     .welcome h2 {
       color: #1a1a1a;
       margin-bottom: 8px;
+      font-size: 24px;
     }
     .welcome p {
-      color: #4a5568;
+      color: #718096;
+      font-size: 16px;
     }
     .cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 24px;
       margin-bottom: 32px;
     }
@@ -79,24 +82,43 @@
       transform: translateY(-4px);
       box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
     .card h3 {
       color: #1a1a1a;
       margin-bottom: 8px;
       font-size: 18px;
+      font-weight: 600;
     }
     .card p {
-      color: #4a5568;
+      color: #718096;
       font-size: 14px;
+      line-height: 1.5;
+    }
+    .card-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      gap: 4px;
+      background: #f0fff4;
+      color: #276749;
     }
     .icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 8px;
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
       margin-bottom: 16px;
-      font-size: 24px;
+      font-size: 28px;
     }
     .inward { background: #bee3f8; color: #2b6cb0; }
     .outward { background: #fed7d7; color: #c53030; }
@@ -122,52 +144,54 @@
     </div>
 
      <div class="cards">
-       <a href="material-inward.html" class="card" id="inwardEntryCard">
-         <div class="icon inward">📥</div>
+       <a href="material-inward-list.html" class="card" id="inwardCard">
+         <div class="card-header">
+           <div class="icon inward">📥</div>
+           <span class="card-badge"><span>➕</span> New Entry</span>
+         </div>
          <h3>Material Inward</h3>
-         <p>Register incoming materials with DC details</p>
+         <p>View and manage incoming material entries with DC details</p>
        </a>
 
-       <a href="material-outward.html" class="card" id="outwardEntryCard">
-         <div class="icon outward">📤</div>
+       <a href="material-outward-list.html" class="card" id="outwardCard">
+         <div class="card-header">
+           <div class="icon outward">📤</div>
+           <span class="card-badge"><span>➕</span> New Entry</span>
+         </div>
          <h3>Material Outward</h3>
-         <p>Register outgoing materials with DC details</p>
-       </a>
-
-       <a href="material-inward-list.html" class="card" id="inwardListCard" style="display: none;">
-         <div class="icon inward">📥</div>
-         <h3>Material Inward List</h3>
-         <p>View all incoming material entries</p>
-       </a>
-
-       <a href="material-outward-list.html" class="card" id="outwardListCard" style="display: none;">
-         <div class="icon outward">📤</div>
-         <h3>Material Outward List</h3>
-         <p>View all outgoing material entries</p>
+         <p>View and manage outgoing material entries with DC details</p>
        </a>
 
        <a href="vendor-entry.html" class="card" id="vendorEntryCard">
-         <div class="icon vendor">👤</div>
+         <div class="card-header">
+           <div class="icon vendor">👤</div>
+         </div>
          <h3>Vendor Entry</h3>
-         <p>Register visitors with Aadhaar verification</p>
+         <p>Register visitors with Aadhaar card OCR verification</p>
        </a>
 
        <a href="vehicle-entry.html" class="card" id="vehicleEntryCard">
-         <div class="icon vehicle">🚗</div>
+         <div class="card-header">
+           <div class="icon vehicle">🚗</div>
+         </div>
          <h3>Vehicle Entry</h3>
          <p>Register vehicles entering the premises</p>
        </a>
 
        <a href="vendor-list.html" class="card">
-         <div class="icon list">📋</div>
+         <div class="card-header">
+           <div class="icon list">📋</div>
+         </div>
          <h3>Vendor/Vehicle List</h3>
-         <p>View and manage entries with exit tracking</p>
+         <p>View and manage active entries with exit tracking</p>
        </a>
 
        <a href="user-management.html" class="card" id="usersCard">
-         <div class="icon users">👥</div>
+         <div class="card-header">
+           <div class="icon users">👥</div>
+         </div>
          <h3>User Management</h3>
-         <p>Admin only - Manage gate users</p>
+         <p>Admin only - Manage gate users and permissions</p>
        </a>
      </div>
   </div>
@@ -181,18 +205,14 @@
       window.location.href = 'index.html';
     }
 
-     document.getElementById('currentUser').textContent = user.username + ` (${user.role})`;
+    document.getElementById('currentUser').textContent = user.username + ` (${user.role})`;
 
-     if (user.role === 'Admin') {
-       document.getElementById('inwardEntryCard').style.display = 'none';
-       document.getElementById('outwardEntryCard').style.display = 'none';
-       document.getElementById('vendorEntryCard').style.display = 'none';
-       document.getElementById('vehicleEntryCard').style.display = 'none';
-       document.getElementById('inwardListCard').style.display = 'block';
-       document.getElementById('outwardListCard').style.display = 'block';
-     } else {
-       document.getElementById('usersCard').style.display = 'none';
-     }
+    if (user.role === 'Admin') {
+      document.getElementById('vendorEntryCard').style.display = 'none';
+      document.getElementById('vehicleEntryCard').style.display = 'none';
+    } else {
+      document.getElementById('usersCard').style.display = 'none';
+    }
 
     document.getElementById('logoutBtn').addEventListener('click', () => {
       localStorage.removeItem('token');
