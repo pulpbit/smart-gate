@@ -349,81 +349,203 @@
     function extractNameFromText(text) {
       const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 2);
       
-      const nameKeywords = ['name', 'नाम', 'nama', 'nane', 'nam'];
-      const excludedWords = ['government', 'india', 'aadhaar', 'unique', 'identification', 'authority', 
-                             'महानिदेशालय', 'आधार', 'भारत', 'सरकार', 'govt', 'of', 'the', 'to',
-                             'address', 'पता', 'dob', 'date', 'birth', 'जन्म', 'male', 'female',
-                             'पुरुष', 'महिला', 'm', 'f', 'enrolment', 'enroll', 'vid', 'help',
-                             'uidai', 'www', 'gov', 'in', '1947', 'care', 'contact', 'toll', 'free'];
+      console.log('OCR Lines:', lines);
+      
+      const excludedWords = [
+        'government', 'india', 'aadhaar', 'unique', 'identification', 'authority',
+        'महानिदेशालय', 'आधार', 'भारत', 'सरकार', 'govt', 'of', 'the', 'to',
+        'address', 'पता', 'dob', 'date', 'birth', 'जन्म', 'male', 'female',
+        'पुरुष', 'महिला', 'm', 'f', 'enrolment', 'enroll', 'vid', 'help',
+        'uidai', 'www', 'gov', 'in', '1947', 'care', 'contact', 'toll', 'free',
+        'issue', 'download', 'mobile', 'email', 'web', 'site', 'register',
+        'national', 'id', 'identity', 'card', 'resident', 'citizen', 'portal',
+        'public', 'private', 'limited', 'ltd', 'pvt', 'company', 'services',
+        'state', 'central', 'ministry', 'department', 'office', 'division',
+        'भारत सरकार', 'unique identification', 'uidai', 'help@uidai', '1947',
+        'issuing', 'authority', 'bharat', 'sarkar', 'कार्यालय', 'विभाग',
+        'पत्र', 'अधिकार', 'नियम', 'नियमन', 'पंजीकरण', 'पंजीकृत',
+        'downloaded', 'from', 'this', 'is', 'your', 'for', 'and', 'or', 'by',
+        'with', 'without', 'not', 'no', 'yes', 'true', 'false', 'valid',
+        'invalid', 'expired', 'fresh', 'new', 'old', 'original', 'copy',
+        'duplicate', 'reprint', 'reissue', 'update', 'updation', 'correction',
+        'change', 'request', 'application', 'form', 'acknowledgment', 'slip',
+        'receipt', 'number', 'code', 'reference', 'transaction', 'id',
+        'generated', 'printed', 'on', 'at', 'time', 'day', 'month', 'year',
+        'verify', 'verification', 'kyc', 'know', 'your', 'customer', 'client',
+        'resident', 'non-resident', 'nri', 'oci', 'pio', 'foreigner',
+        'name', 'नाम', 'nama', 'nane', 'nam', 'father', 'माता', 'मातृ',
+        'mother', 'पिता', 'पितृ', 'parent', 'guardian', 'spouse', 'wife',
+        'husband', 'son', 'daughter', 'child', 'relative', 'relation',
+        'address', 'पता', 'address1', 'address2', 'address3', 'street',
+        'road', 'lane', 'gali', 'mohalla', 'colony', 'sector', 'block',
+        'building', 'floor', 'flat', 'room', 'house', 'plot', 'survey',
+        'village', 'town', 'city', 'district', 'tehsil', 'taluk', 'state',
+        'country', 'india', 'pin', 'pincode', 'zip', 'code', 'postal',
+        'male', 'पुरुष', 'purush', 'female', 'महिला', 'mahila', 'transgender',
+        'third', 'gender', 'sex', 'm/', 'f/', 'm:', 'f:', 'trans'
+      ];
+      
+      const excludedExact = [
+        'm', 'f', 'mr', 'mrs', 'ms', 'dr', 'prof', 'shri', 'smt', 'kum',
+        's/o', 'd/o', 'w/o', 'h/o', 'son of', 'daughter of', 'wife of', 'husband of',
+        'c/o', 'care of', 's/o:', 'd/o:', 'w/o:', 'h/o:', 'c/o:'
+      ];
+
+      let dobIndex = -1;
+      let genderIndex = -1;
+      let nameKeywordIndex = -1;
+      let uidaiIndex = -1;
+      let govtIndex = -1;
       
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i].toLowerCase();
         
-        for (const keyword of nameKeywords) {
-          if (line.includes(keyword)) {
-            const match = lines[i].match(/[:\s]([A-Z][a-zA-Z\s]{3,})/);
-            if (match) {
-              const candidate = match[1].trim();
-              const words = candidate.toLowerCase().split(/\s+/);
-              const isExcluded = words.some(w => excludedWords.includes(w));
-              if (!isExcluded && candidate.length > 3) {
-                return candidate;
-              }
+        if (line.includes('dob') || line.includes('birth') || line.includes('जन्म') || line.includes('date')) {
+          if (dobIndex === -1) dobIndex = i;
+        }
+        
+        if (line.includes('male') || line.includes('female') || line.includes('पुरुष') || line.includes('महिला')) {
+          if (genderIndex === -1) genderIndex = i;
+        }
+        
+        if (line.includes('name') || line.includes('नाम') || line.includes('nama') || line.includes('nane')) {
+          if (nameKeywordIndex === -1) nameKeywordIndex = i;
+        }
+        
+        if (line.includes('uidai') || line.includes('unique')) {
+          if (uidaiIndex === -1) uidaiIndex = i;
+        }
+        
+        if (line.includes('government') || line.includes('भारत') || line.includes('सरकार')) {
+          if (govtIndex === -1) govtIndex = i;
+        }
+      }
+
+      console.log('Indices - dob:', dobIndex, 'gender:', genderIndex, 'nameKeyword:', nameKeywordIndex, 'uidai:', uidaiIndex, 'govt:', govtIndex);
+
+      if (nameKeywordIndex !== -1) {
+        const line = lines[nameKeywordIndex];
+        const lineLower = line.toLowerCase();
+        
+        const match = line.match(/(?:name|नाम|nama|nane|nam)\s*[:\/\-\s]\s*([A-Za-z\u0900-\u097F\s]{3,})/i);
+        if (match) {
+          let candidate = match[1].trim();
+          const candidateLower = candidate.toLowerCase();
+          
+          if (!excludedWords.some(w => candidateLower.includes(w)) && 
+              !excludedExact.includes(candidateLower) &&
+              candidate.length > 3) {
+            const cleanName = candidate.replace(/[^A-Za-z\u0900-\u097F\s]/g, '').trim();
+            if (cleanName.length > 3) {
+              console.log('Found name after keyword:', cleanName);
+              return cleanName;
             }
-            
-            if (i + 1 < lines.length) {
-              const nextLine = lines[i + 1];
-              const nextLineLower = nextLine.toLowerCase();
-              const isExcluded = excludedWords.some(w => nextLineLower.includes(w));
-              
-              if (!isExcluded && /^[A-Z][a-zA-Z\s]{3,}$/.test(nextLine.trim())) {
-                return nextLine.trim();
-              }
-              
-              if (!isExcluded && nextLine.trim().length > 3) {
-                const hasExcluded = excludedWords.some(w => nextLineLower.includes(w));
-                if (!hasExcluded) {
-                  const justName = nextLine.replace(/[^a-zA-Z\s]/g, '').trim();
-                  if (justName.length > 3) {
-                    return justName;
-                  }
-                }
-              }
+          }
+        }
+        
+        if (nameKeywordIndex + 1 < lines.length) {
+          let candidate = lines[nameKeywordIndex + 1].trim();
+          const candidateLower = candidate.toLowerCase();
+          
+          if (!excludedWords.some(w => candidateLower.includes(w)) && 
+              !excludedExact.includes(candidateLower) &&
+              candidate.length > 3 &&
+              (dobIndex === -1 || nameKeywordIndex + 1 < dobIndex)) {
+            const cleanName = candidate.replace(/[^A-Za-z\u0900-\u097F\s]/g, '').trim();
+            if (cleanName.length > 3) {
+              console.log('Found name on next line:', cleanName);
+              return cleanName;
             }
           }
         }
       }
-      
-      const namePatterns = [
-        /([A-Z][a-z]{2,}\s+[A-Z][a-z]{2,}(?:\s+[A-Z][a-z]{0,})?)/,
-        /([A-Z]{3,}\s+[A-Z]{3,}(?:\s+[A-Z]{2,})?)/,
-      ];
-      
-      for (const line of lines) {
+
+      const startSearch = Math.max(uidaiIndex, govtIndex, -1) + 1;
+      const endSearch = Math.min(
+        dobIndex !== -1 ? dobIndex : lines.length,
+        genderIndex !== -1 ? genderIndex : lines.length
+      );
+
+      console.log('Searching between lines', startSearch, 'and', endSearch);
+
+      for (let i = startSearch; i < endSearch && i < lines.length; i++) {
+        let line = lines[i].trim();
+        const lineLower = line.toLowerCase();
+        
+        if (excludedWords.some(w => lineLower.includes(w))) {
+          console.log('Skipping line (has excluded word):', line);
+          continue;
+        }
+        
+        if (lineLower.match(/^\d+[\s\d]*$/)) {
+          console.log('Skipping line (all digits):', line);
+          continue;
+        }
+        
+        const hasDigits = /\d/.test(line);
+        const hasSpecial = /[^A-Za-z\u0900-\u097F\s\.\-\']/.test(line);
+        
+        if (hasDigits && !hasSpecial) {
+          console.log('Skipping line (has digits):', line);
+          continue;
+        }
+        
+        const namePatterns = [
+          /^([A-Z][a-z]{2,}\s+[A-Z][a-z]{2,}(?:\s+[A-Z][a-z]{0,})?)$/,
+          /^([A-Z]{3,}\s+[A-Z]{3,}(?:\s+[A-Z]{2,})?)$/,
+          /^([A-Za-z]{2,}\s+[A-Za-z]{2,}(?:\s+[A-Za-z]{2,})?)$/,
+          /^([\u0900-\u097F]{2,}\s+[\u0900-\u097F]{2,}(?:\s+[\u0900-\u097F]{2,})?)$/
+        ];
+        
         for (const pattern of namePatterns) {
           const match = line.match(pattern);
           if (match) {
             const candidate = match[1].trim();
-            const lower = candidate.toLowerCase();
-            const isExcluded = excludedWords.some(w => lower.includes(w));
-            if (!isExcluded && candidate.length > 5) {
+            const candidateLower = candidate.toLowerCase();
+            
+            if (!excludedWords.some(w => candidateLower.includes(w)) && 
+                !excludedExact.includes(candidateLower) &&
+                candidate.length > 5) {
+              console.log('Found name with pattern:', candidate);
               return candidate;
             }
           }
         }
+        
+        const words = line.split(/\s+/).filter(w => w.length > 1);
+        if (words.length >= 2 && words.length <= 4) {
+          const allExcluded = words.every(w => excludedWords.includes(w.toLowerCase()));
+          if (!allExcluded) {
+            const hasAlpha = words.some(w => /[A-Za-z\u0900-\u097F]/.test(w));
+            if (hasAlpha && !hasDigits) {
+              console.log('Found name as word sequence:', line);
+              return line;
+            }
+          }
+        }
       }
-      
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (/^[A-Za-z\s]{4,}$/.test(trimmed)) {
-          const lower = trimmed.toLowerCase();
-          const isExcluded = excludedWords.some(w => lower.includes(w));
-          if (!isExcluded && trimmed.split(/\s+/).length >= 2) {
-            return trimmed;
+
+      for (let i = 0; i < lines.length; i++) {
+        let line = lines[i].trim();
+        const lineLower = line.toLowerCase();
+        
+        if (excludedWords.some(w => lineLower.includes(w))) continue;
+        if (/^\d+$/.test(line)) continue;
+        if (line.length < 5) continue;
+        
+        const words = line.split(/\s+/).filter(w => w.length > 1);
+        if (words.length >= 2 && words.length <= 4) {
+          const hasAlpha = /[A-Za-z\u0900-\u097F]/.test(line);
+          const hasDigits = /\d/.test(line);
+          
+          if (hasAlpha && !hasDigits) {
+            console.log('Found name in fallback search:', line);
+            return line;
           }
         }
       }
       
+      console.log('No name found in OCR text');
       return null;
     }
 
